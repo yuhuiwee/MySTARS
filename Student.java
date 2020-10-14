@@ -3,6 +3,9 @@ import java.util.*;
 public class Student extends Person {
     private HashMap <String, Integer> registered_courses;
     private HashMap <String, Integer> waitlist_courses;
+    private boolean swopstatus = false;
+    private HashMap <Integer, Integer> pendingswap;
+    private HashMap <Integer, Integer> successswap;
 
     public Student(String user, String name, String matric, char gender, String nationality){
         this.username = user;
@@ -53,12 +56,37 @@ public class Student extends Person {
     }
     public void check_vacancies(){
         System.out.println("The vacancies for each index are as follows:");
-        //print vacancies of each index
-    };
+        //TODO: print vacancies of each index
+    }
     public void swop_index(String cor, int newindex, String newstudentusername){
         int selfindex = registered_courses.get(cor);
         boolean swaped = Swop.swopStudent(cor, selfindex, newindex, username, newstudentusername);
+        if (swaped){
+            System.out.println("Swap successful!");
+        }
+        else{
+            
+            pendingswap.put(selfindex, newindex);
+        }
 
-    };
+    }
+
+    public boolean getSwopStatus(){
+        //If true call printswoppedlist()
+        return swopstatus;
+    }
+
+    public void setSwopstatus(int index1, int index2){
+        //TODO: call Student object from swop.java and call this after successful swop
+        this.swopstatus = true; //set true when swap with student2 successful
+        successswap.put(index1, index2);
+
+    }
+    public void printSwoppedlist(){
+        for (Map.Entry<Integer, Integer> entry: successswap.entrySet()){
+            System.out.println("Successfullly swapped Course Index " + entry.getKey() + " to Course Index " + entry.getValue());
+        }
+        this.swopstatus = false;
+    }
 
 }

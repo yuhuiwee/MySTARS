@@ -1,51 +1,96 @@
 import java.util.*;
 
 public class CourseList {
-	private String courseCode;
-	private String school;
-	private String courseType; // lect/ lect + tuts / lect + tuts + lab
-	private String userName;
-    private IndexNum indexNum; /*Actually now to think of it, since the values of each indexNum is unique
-								 and the values are fixed, should we use the one YiHui talked abt, the
-								 hashmap thing like dictionary in java??
-								 something like that
-								 so we do that ah?
-								 according to YH? ah we do that instead of creating alot of array
-								 so when we store all our data, it is store as a Key/Value
-								 Okay, guess have a lot to read up
-								 hahaha same here
-								 This value realtes to the IndexNum class which has separate attributes
-								 like class-schedule, venue, vacancy and indexnum etc. 
-								 */
+	//All these attributes are not necessary! They should be under Course.java!
+	//CourseList shoulld really be just a List of all the courses.
+	//Kind of like the content page that direct you to the correct course
+	//Start coding from IndexNum, then Course, then finally CourseList.. It will be easier
+	//While its more logical to code top down, u have to keep visualising the codes downstream
+	//Ciding from bottom up means u can see ur downstream codes and make edits easier
 
-	public CourseList(String courseCode, String school, String courseType, IndexNum indexNum) {
-		this.courseCode = courseCode; 
-        this.school = school;
-        this.courseType = courseType;
-		this.indexNum = indexNum;
-    }
+	private HashMap<String, Course> mapCourse = new HashMap<String, Course>();
+	//Attributes needed: (Yes, literally only one attribute needed)
+	//Hashmap <String, Course>
+	//  --maps "CE2002" to Object CE2002
 
-    /* ----------- Get Methods -----------*/
-
-	public String getCourseCode() {
-		return courseCode;
+	//Methods needed:
+	public void PrintAll() {
+		for (Map.Entry<String, Course> entry : mapCourse.entrySet()) {
+			System.out.println(entry.getKey());
+		}
 	}
-    public String getSchool(){ return school; }
-    public String getCourseType(){ return courseCode; }
-    
+	//PrintAll()
+	//  -- prints all courses in a list
+	//  --If yall very free, can also filter by school etc... but this isnt required
 
-	public boolean addCourse( String course, int index, String userName){
-        
-        return true;    // Actually hor, should we include userName of student in the CourseList class?
-                        // because if u see Chapt 2 slide 68, they assign the student to the course
-                        // using a different application class
-                        // For this method i guess we have to fetch the vacancy from IndexNum class
-                        // to return true or false depending if its full or not
-                        // yall want 
-    }
-
-	public boolean dropCourse(String course, int index, String userName) {
-		// i blur already sia
-		return true;
+	public void PrintStudentCourse(String course, int index, String username) {
 	}
+	//Print course(String course, int index)
+	//  --for student to print the courses they have registered for
+	
+	//--- I think this one should be placed in the Student Class since there is a hashmap which stores the 
+	//registered courses of each student.---
+
+	//For method NewCourse, 
+	public void NewCourse(String courseCode, String newCourseCode, Boolean update) 
+	{
+
+		if (mapCourse.containsKey(courseCode))
+		{
+			return;
+		}
+		else
+		{
+			if (update)
+			{
+				mapCourse.get(courseCode).updateCourseCode(courseCode);
+			}
+			else
+			{
+				
+			}
+		
+		}
+
+	}
+
+	public void updateCourseCode(String newCourseCode)
+	{
+		if (mapCourse.containsKey(newCourseCode))
+		{
+			
+		}
+	}
+
+	//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
+	//  --for admin to add new courses
+	//  --Create new Course object & set attributes
+	//  --adds newly created Course object to hashmap with String coursecode as key
+
+	public void AddCourse(String coursecode, int index, String username) {
+		mapCourse.get(coursecode).addCourse(index,username);
+	}
+	//Addcourse(String coursecode, int index, String username)
+	//  --for student to add new courses
+	//  --Use String coursecode to get Course object
+	//  --Call method addcourse from Course object
+	//  --Course.addcourse shold return a true/false value
+	//  --true = successfully added
+	//  --false = no more vacancies. Put on waitlist
+
+	public void DropCourse(String coursecode, int index, String username) {
+	}
+	//Dropcourse(String coursecode, int index, String username)
+	//  --for student to drop courses
+	//  --Similar to CourseList.addcourse
+	//  --Course.dropcourse should return true/false
+	//  --true = successfully dropped course
+	//  --false = student not registered for that course index the first place.. so unable to drop
+
+	public void Swopcourse(String student1, String student2, int index1, int index 2, String coursecode){
+		
+	}
+	//Swopcourse(String student1, String student2, int index1, int index 2, String coursecode)
+	//  --to swop index with students
+
 }

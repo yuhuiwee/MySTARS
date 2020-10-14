@@ -6,7 +6,10 @@ public class Swop {
     String k;
     ArrayList<Swopgroup> courseswaplist;
     private HashMap <String, ArrayList<Swopgroup>> groups;
+
     public Swop(){
+        // TODO import from .ser file. If !exist, create new Hashmap & export
+        // To call .ser file at the start of the application!
         groups = new HashMap <String, ArrayList<Swopgroup>>();
     }
     public boolean swopStudent(String cor, int index1, int index2, String student1, String student2){
@@ -17,22 +20,42 @@ public class Swop {
             k = student2 + ":" + student1;
         }
         
-        if (groups.containsKey(k)){
-            courseswaplist = groups.get(k);
+        if (groups.containsKey(k)){ // Student has pending swap with 2nd student
+            //While else loop
 
+            boolean nobreak = true;
+            courseswaplist = groups.get(k);
             ListIterator<Swopgroup> i = courseswaplist.listIterator();
             while (i.hasNext()){
                 Swopgroup temp = i.next();
                 if (temp.getIndex1() == index1 & temp.getIndex2() == index2){
-                    CourseList.dropCourse(cor, index1, student1);
-                    CourseList.dropCourse(cor, index2, student2);
-                    CourseList.addCourse(cor, index1, student2);
-                    CourseList.addCourse(cor, index2, student1);
-                    dropswop(k, temp);
+                    System.out.printf("Pending!\nWaiting for %s to swop", student2);
+                    return false;
+                    break;
+                    
                 }
                 else if (temp.getIndex1() == index2 & temp.getIndex2() == index1){
-
+                    //TODO change to CourseList.swop()
+                    CourseList.swop(cor, index1, student1);
+                    CourseList.swop(cor, index2, student2);
+                    CourseList.swop(cor, index1, student2);
+                    CourseList.swop(cor, index2, student1);
+                    
+                    //FIXME: Call student2 and set swop status
+                    // drop swopgroup class from array
+                    courseswaplist.remove(temp);
+                    temp = null; //remove object from memory
+                    nobreak = false;
+                    return true;
+                    break;
                 }
+            }
+
+            if (nobreak){
+                //Student has pending swap this is a different swap;
+                Swopgroup newswop1 = new Swopgroup(student1, student2, index1, index2);
+                courseswaplist.add(newswop1);
+                groups.put(k, courseswaplist);
             }
             return true;
             
@@ -45,13 +68,42 @@ public class Swop {
             return false;
         }
     }
-    private boolean dropswop(){
+    public boolean dropswop(String student1, String student2, int index1, int index2){
+        if (student1.compareTo(student2)>0){
+            k = student1 + ":" + student2;            
+        }
+        else{
+            k = student2 + ":" + student1;
+        }
+
+        if (groups.containsKey(k)){
+            boolean nobreak = true;
+            courseswaplist = groups.get(k);
+            ListIterator<Swopgroup> i = courseswaplist.listIterator();
+            while (i.hasNext()){
+                //Only student that initiated the swop can drop the swop
+                Swopgroup temp = i.next();
+                if (temp.getIndex1() == index1 & temp.getIndex2() == index2){
+                    courseswaplist.remove(temp);
+                    temp = null; //remove object from memory
+                    nobreak = false;
+                    return true;
+                }
+            }
+
+            if (nobreak){
+                System.out.println("Swop not found!");
+                return false;
+            }
+        }
+        
+        else{
+            System.out.println("Swop not found!");
+            return false;
+        }
         return true;
     }
 
-    private boolean swapping(){
-
-    }
 }
 class Swopgroup{
     private String student1;
