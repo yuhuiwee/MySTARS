@@ -18,6 +18,7 @@ public class Student extends Person {
     }
 
     public void add_course(String course, int index){
+        //TODO: change CourseList.addcourse to static method
         boolean courseadd = CourseList.addCourse(course, index, username);  //CourseList.add returns boolean
         if (courseadd){
             System.out.println("Course added successfully!");
@@ -73,20 +74,22 @@ public class Student extends Person {
 
     public boolean getSwopStatus(){
         //If true call printswoppedlist()
+        //TODO: on application.java--> check swop status and call printswoppedlist()
         return swopstatus;
     }
 
     public void setSwopstatus(int index1, int index2){
-        //TODO: call Student object from swop.java and call this after successful swop
         this.swopstatus = true; //set true when swap with student2 successful
+        pendingswap.remove(index1); //remove from pending
         successswap.put(index1, index2);
 
     }
     public void printSwoppedlist(){
+        //Print list of courses successfully swopped
         for (Map.Entry<Integer, Integer> entry: successswap.entrySet()){
             System.out.println("Successfullly swapped Course Index " + entry.getKey() + " to Course Index " + entry.getValue());
         }
-        this.swopstatus = false;
+        this.swopstatus = false; //reset swop status
     }
 
 }

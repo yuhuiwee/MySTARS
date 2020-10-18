@@ -1,4 +1,7 @@
 import java.util.*;
+//FIXME: Make methods static.. Hash map should also be static--> same for all students at all times.
+//If a method is static, there is no need to call new CourseList and hence, no need to pass CourseList object into methods
+//If all methods are static, then there is no need to call constructer
 
 public class CourseList {
 	//All these attributes are not necessary! They should be under Course.java!
@@ -12,6 +15,14 @@ public class CourseList {
 	//Attributes needed: (Yes, literally only one attribute needed)
 	//Hashmap <String, Course>
 	//  --maps "CE2002" to Object CE2002
+	//TODO: Add method to load and save hashmap.
+	//OR:: Load and save hashmap with every method
+	//OR:: Have a check at the start of the function. If hashmap is empty, load the hashmap
+	//--If file isnt found, create new hashmap
+	//--else, load the file and assign to hashmap. 
+	//----save before exiting the method if the hashmap is edited.
+	//----also update static hashmap attribut in this class
+	//----personally recommend this method as its safer :)
 
 	//Methods needed:
 	public void PrintAll() {
@@ -30,6 +41,8 @@ public class CourseList {
 	
 	//--- I think this one should be placed in the Student Class since there is a hashmap which stores the 
 	//registered courses of each student.---
+	//YuHui: This hashmap only stores the course name and index. Need this method to call for course description details :)
+	//YuHui: But if we arent planning on displaying this info, then its ok.. Its just more convenient to add more deets in the future if we really need to.
 
 	//For method NewCourse, 
 	public void NewCourse(String courseCode, String newCourseCode, Boolean update) 
@@ -39,6 +52,7 @@ public class CourseList {
 		{
 			return;
 		}
+
 		else
 		{
 			if (update)
@@ -54,9 +68,15 @@ public class CourseList {
 
 	}
 
-	public void updateCourseCode(String newCourseCode)
+	public void updateCourseCode(String newCourseCode) // TODO: insert the current course code as well
 	{
 		if (mapCourse.containsKey(newCourseCode))
+		{
+			System.out.println("There is already an existing course code");
+			return;
+		}
+
+		else 
 		{
 			
 		}
@@ -87,7 +107,7 @@ public class CourseList {
 	//  --true = successfully dropped course
 	//  --false = student not registered for that course index the first place.. so unable to drop
 
-	public void Swopcourse(String student1, String student2, int index1, int index 2, String coursecode){
+	public void SwopCourse(String student1, String student2, int index1, int index 2, String coursecode){
 		
 	}
 	//Swopcourse(String student1, String student2, int index1, int index 2, String coursecode)

@@ -41,12 +41,17 @@ public class Course
 	public void setSchool(String school) {
         this.school = school;
     }
+
+    public void updateCourseCode(String currentCourseCode, String newCourseCode)
+    {   
+        //TODO: How to find the course that they want to update
+    }
     // Since Admin can add/update course, we have to include all the mutator methods of course. But since
     // they can only change these 2 variables, we don't include the rest of the variables.
 
     /* ----------- Normal Methods -----------*/
 
-    public boolean addCourse(int index, String userName)
+    public boolean addCourse(int index, String userName) //for students to add course
     {
         mapIndex.get(index).addStudent(userName); //mapIndex.get(course) = object
         return true;

@@ -3,16 +3,17 @@ import java.util.*;
 public class Swop {
     //return true if swap successful
     //return false if swap is pending
-    String k;
-    ArrayList<Swopgroup> courseswaplist;
-    private HashMap <String, ArrayList<Swopgroup>> groups;
+    
+    private static ArrayList<Swopgroup> courseswaplist;
+    private static HashMap <String, ArrayList<Swopgroup>> groups;
 
-    public Swop(){
-        // TODO import from .ser file. If !exist, create new Hashmap & export
+    public static void loadswoplist(){
+        // TODO: import from .ser file. If !exist, create new Hashmap & export
         // To call .ser file at the start of the application!
         groups = new HashMap <String, ArrayList<Swopgroup>>();
     }
-    public boolean swopStudent(String cor, int index1, int index2, String student1, String student2){
+    public static boolean swopStudent(String cor, int index1, int index2, String student1, String student2){
+        String k;
         if (student1.compareTo(student2)>0){
             k = student1 + ":" + student2;            
         }
@@ -35,15 +36,18 @@ public class Swop {
                     
                 }
                 else if (temp.getIndex1() == index2 & temp.getIndex2() == index1){
-                    //TODO change to CourseList.swop()
-                    CourseList.swop(cor, index1, student1);
-                    CourseList.swop(cor, index2, student2);
-                    CourseList.swop(cor, index1, student2);
-                    CourseList.swop(cor, index2, student1);
+                    //getIndex1 == index of student that initiated
+                    //index1 = current student's index
+                    //TODO: assign method at CourseList
+                    CourseList.SwopCourse(cor, index1, student1);
+                    CourseList.SwopCourse(cor, index2, student2);
+                    CourseList.SwopCourse(cor, index1, student2);
+                    CourseList.SwopCourse(cor, index2, student1);
                     
-                    //FIXME: Call student2 and set swop status
                     // drop swopgroup class from array
                     courseswaplist.remove(temp);
+                    //Call student by username and set swop status
+                    StudentList.getStudentbyusername(student2).setSwopstatus(index2, index1);
                     temp = null; //remove object from memory
                     nobreak = false;
                     return true;
@@ -68,7 +72,8 @@ public class Swop {
             return false;
         }
     }
-    public boolean dropswop(String student1, String student2, int index1, int index2){
+    public static boolean dropswop(String student1, String student2, int index1, int index2){
+        String k;
         if (student1.compareTo(student2)>0){
             k = student1 + ":" + student2;            
         }
