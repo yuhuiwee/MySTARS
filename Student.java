@@ -9,7 +9,7 @@ public class Student extends Person {
 
     public Student(String user, String name, String matric, char gender, String nationality){
         this.username = user;
-        this.studentname = name;
+        this.name = name;
         this.matricnum = matric;
         this.gender = gender;
         this.nationality = nationality;
@@ -31,15 +31,22 @@ public class Student extends Person {
         }
     };
     public void drop_course(String course, double index){
-		boolean coursedrop = CourseList.dropCourse(course, index, username); //CourseList.drop returns boolean
-        
-        if(coursedrop){
-            waitlist_courses.remove(course, index);
-            registered_courses.remove(course, index);
-            System.out.println("Course removed successfully!");
+        if (waitlist_courses.containsKey(course) & waitlist_courses.get(course)==index){
+            waitlist_courses.remove(course);
+            boolean coursedrop = CourseList.dropCourse(course, index, username); //CourseList.drop returns boolean
+            if (!coursedrop){
+                System.out.println("Error in coding!"); //Should only return true
+            }
         }
-        else {
-            System.out.println("Error! You are not registered for this course.");
+        else if( registered_courses.containsKey(course) & registered_courses.get(course)==index){
+            registered_courses.remove(course);
+            boolean coursedrop = CourseList.dropCourse(course, index, username); //CourseList.drop returns boolean
+            if (!coursedrop){
+                System.out.println("Error in coding!"); // Should only return true
+            }
+        }
+        else{
+            System.out.println("Error! You are not registered for this course");
         }
     };
     
@@ -92,4 +99,7 @@ public class Student extends Person {
         this.swopstatus = false; //reset swop status
     }
 
-}
+    public void printStudentDetails(){
+        System.out.printf("Name: %s, Gender: %s, Nationality: %s", name, gender, nationality);
+    }
+

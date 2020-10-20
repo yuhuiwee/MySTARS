@@ -1,17 +1,38 @@
 import java.util.*;
+import java.io.*;
 //FIXME: Make methods static.. Hash map should also be static--> same for all students at all times.
 //If a method is static, there is no need to call new CourseList and hence, no need to pass CourseList object into methods
 //If all methods are static, then there is no need to call constructer
 
 public class CourseList {
-	//All these attributes are not necessary! They should be under Course.java!
 	//CourseList shoulld really be just a List of all the courses.
 	//Kind of like the content page that direct you to the correct course
 	//Start coding from IndexNum, then Course, then finally CourseList.. It will be easier
 	//While its more logical to code top down, u have to keep visualising the codes downstream
 	//Ciding from bottom up means u can see ur downstream codes and make edits easier
 
-	private HashMap<String, Course> mapCourse = new HashMap<String, Course>();
+	private static HashMap<String, Course> mapCourse = new HashMap<String, Course>();
+
+	public static void readCourseList() {
+		String filePath = "test.txt";
+		//HashMap<String, String> map = new HashMap<String, String>();
+	
+		String line;
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
+		while ((line = reader.readLine()) != null)
+		{
+			String[] parts = line.split(":", 2);
+			if (parts.length >= 2)
+			{
+				String key = parts[0];
+				Course c1 = parts[1].readObject();
+				String value = parts[1];
+				mapCourse.put(key, value);
+			} else {
+				System.out.println("ignoring line: " + line);
+			}
+		}
+	}
 	//Attributes needed: (Yes, literally only one attribute needed)
 	//Hashmap <String, Course>
 	//  --maps "CE2002" to Object CE2002
@@ -35,6 +56,7 @@ public class CourseList {
 	//  --If yall very free, can also filter by school etc... but this isnt required
 
 	public void PrintStudentCourse(String course, int index, String username) {
+
 	}
 	//Print course(String course, int index)
 	//  --for student to print the courses they have registered for
@@ -44,31 +66,27 @@ public class CourseList {
 	//YuHui: This hashmap only stores the course name and index. Need this method to call for course description details :)
 	//YuHui: But if we arent planning on displaying this info, then its ok.. Its just more convenient to add more deets in the future if we really need to.
 
-	//For method NewCourse, 
-	public void NewCourse(String courseCode, String newCourseCode, Boolean update) 
+	//For method NewCourse, it is for the admin to add a totally new course into the list
+	public void NewCourse(String newCourseCode, String school, String courseType) 
 	{
 
-		if (mapCourse.containsKey(courseCode))
+		if (mapCourse.containsKey(newCourseCode))
 		{
+			System.out.println("There is already an existing course code");
 			return;
 		}
 
 		else
 		{
-			if (update)
-			{
-				mapCourse.get(courseCode).updateCourseCode(courseCode);
-			}
-			else
-			{
-				
-			}
-		
+			//String nameOfCourse = newCourseCode;
+			Course a = new Course(newCourseCode, school, courseType);
+			mapCourse.put(newCourseCode, a);
+			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
 		}
 
 	}
 
-	public void updateCourseCode(String newCourseCode) // TODO: insert the current course code as well
+	public void updateCourseCode(String currentCourseCode,String newCourseCode, String school, String courseType) // TODO: insert the current course code as well
 	{
 		if (mapCourse.containsKey(newCourseCode))
 		{
@@ -78,19 +96,33 @@ public class CourseList {
 
 		else 
 		{
-			
-		}
-	}
+			Course removedObject = mapCourse.remove(currentCourseCode);
 
-	//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
+			Course a = new Course(newCourseCode, school, courseType);
+			mapCourse.put(newCourseCode, a);
+			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
+		}
+			
+	}//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
 	//  --for admin to add new courses
 	//  --Create new Course object & set attributes
 	//  --adds newly created Course object to hashmap with String coursecode as key
 
-	public void AddCourse(String coursecode, int index, String username) {
+	public void AddCourse(String coursecode, int index, String username) 
+	{
 		mapCourse.get(coursecode).addCourse(index,username);
+
+
+		if (mapCourse.containsKey(coursecode))
+		{	
+			mapCourse.get(coursecode).addCourse(index, userName)
+		}
+		
+		else
+		{
+
+		}
 	}
-	//Addcourse(String coursecode, int index, String username)
 	//  --for student to add new courses
 	//  --Use String coursecode to get Course object
 	//  --Call method addcourse from Course object
@@ -98,7 +130,8 @@ public class CourseList {
 	//  --true = successfully added
 	//  --false = no more vacancies. Put on waitlist
 
-	public void DropCourse(String coursecode, int index, String username) {
+	public static boolean DropCourse(String coursecode, int index, String username) {
+		return true;
 	}
 	//Dropcourse(String coursecode, int index, String username)
 	//  --for student to drop courses
@@ -110,7 +143,33 @@ public class CourseList {
 	public void SwopCourse(String student1, String student2, int index1, int index 2, String coursecode){
 		
 	}
+
+	public static boolean checkCode(String coursecode){
+		if (mapCourse.containsKey(coursecode)){
+			return true;
+		}
+
+		else{
+			return false;
+		}
+
+	}
+
+	public static boolean checkIndex(String coursecode, int index){
+		if (mapCourse.containsKey(coursecode)){
+			Course c = mapCourse.get(coursecode);
+			return c.checkIndex(index);
+		}
+		else{
+			return false;
+		}
+	}
+
+	p
 	//Swopcourse(String student1, String student2, int index1, int index 2, String coursecode)
 	//  --to swop index with students
+
+	//TODO: checkVacancies(String coursecode, int index)
+	//TODO: printStudentList(String coursecode, int index)
 
 }

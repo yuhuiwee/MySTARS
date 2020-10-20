@@ -47,7 +47,7 @@ public class Swop {
                     // drop swopgroup class from array
                     courseswaplist.remove(temp);
                     //Call student by username and set swop status
-                    StudentList.getStudentbyusername(student2).setSwopstatus(index2, index1);
+                    PersonList.getStudentbyusername(student2).setSwopstatus(index2, index1);
                     temp = null; //remove object from memory
                     nobreak = false;
                     return true;

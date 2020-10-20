@@ -67,7 +67,7 @@ public class IndexNum{
 		} 
         else 
         {
-            listOfRegisteredStudents.remove(username);
+            listOfRegisteredStudents.remove(username); //Might be a duplicate since we alr have it up on top
 			vacancy++;
 		}
     }   

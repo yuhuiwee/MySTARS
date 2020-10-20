@@ -3,22 +3,20 @@ import java.util.*;
 public class Course 
 {
 
-    private String courseCode;
+    private String courseCode; 
     private String school;
     private String courseType; // lect/ lect + tuts / lect + tuts + lab
     private String userName;
-    private HashMap<String, IndexNum> mapIndex; //The String in this case is the name of the IndexNum. So for
+    private HashMap<Integer, IndexNum> mapIndex; //The Integer in this case is the name of the IndexNum. So for
                                                 // example if i want to find for index 1024, i can simply use
                                                 // mapIndex.get(1024) to obtain the object indexNum.
 
-    public Course(String courseCode, String school, String courseType, IndexNum indexNum) {
+    public Course(String courseCode, String school, String courseType) {
         this.courseCode = courseCode; 
         this.school = school;
         this.courseType = courseType;
-        //this.indexNum = indexNum;
-        mapIndex = new HashMap<String, IndexNum>();
-		IndexNum I1 = new IndexNum("classSchedule", "venue", 30);
-        
+        mapIndex = new HashMap<Integer, IndexNum>();
+		//IndexNum I1 = new IndexNum("classSchedule", "venue", 30);
     }
 
     /* ----------- Get Methods -----------*/
@@ -30,7 +28,7 @@ public class Course
 		return school;
     }
 	public String getCourseType() {
-		return courseCode;
+		return courseType;
     }
 
 	/* ----------- Set Methods -----------*/
@@ -44,7 +42,14 @@ public class Course
 
     public void updateCourseCode(String currentCourseCode, String newCourseCode)
     {   
+        //FIXME: Is the handling of updating enough in the course list.
         //TODO: How to find the course that they want to update
+
+
+
+
+
+
     }
     // Since Admin can add/update course, we have to include all the mutator methods of course. But since
     // they can only change these 2 variables, we don't include the rest of the variables.
@@ -62,8 +67,17 @@ public class Course
 		mapIndex.get(index).removeStudent(userName, swopFlag);
         return true;
     }
-    public void printVacancy(String indexNum)
+    public void printVacancy(int indexNum)
 	{
         mapIndex.get(indexNum).getVacancy();
-	}
+    }
+    
+    public boolean checkIndex(int index){
+        if (mapIndex.containsKey(index)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
