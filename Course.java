@@ -26,7 +26,7 @@ public class Course
     }
 	public String getSchool() {
 		return school;
-    }
+    } 
 	public String getCourseType() {
 		return courseType;
     }
@@ -44,12 +44,6 @@ public class Course
     {   
         //FIXME: Is the handling of updating enough in the course list.
         //TODO: How to find the course that they want to update
-
-
-
-
-
-
     }
     // Since Admin can add/update course, we have to include all the mutator methods of course. But since
     // they can only change these 2 variables, we don't include the rest of the variables.
@@ -67,6 +61,12 @@ public class Course
 		mapIndex.get(index).removeStudent(userName, swopFlag);
         return true;
     }
+
+    public int getIndexVacancy(int indexNum)
+    {
+        return mapIndex.get(indexNum).getVacancy();
+    }
+
     public void printVacancy(int indexNum)
 	{
         mapIndex.get(indexNum).getVacancy();

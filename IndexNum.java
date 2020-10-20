@@ -7,7 +7,7 @@ public class IndexNum{
     private int vacancy;
     //private int indexNum;
     private ArrayList<String> listOfRegisteredStudents;
-    private ArrayList<String> waitingList;
+    private ArrayList<String> waitingList; 
 
     public IndexNum(String classSchedule, String venue, int vacancy){
         this.classSchedule  = classSchedule;

@@ -34,6 +34,10 @@ public class Application{
     }
 
     public void StudentApp(Scanner sc, Student st, String username){
+        String coursecode;
+        int indexnum;
+        int index2;
+
         System.out.println("Welcome to MySTARS!");
         System.out.println("Enter one of the following options to continue");
 
@@ -45,9 +49,9 @@ public class Application{
             switch (choice){
                 case 1:
                     System.out.print("Enter Course code: ");
-                    String coursecode = sc.next();
+                    coursecode = sc.next();
                     System.out.print("Enter Index number: ");
-                    int indexnum = sc.nextInt();
+                    indexnum = sc.nextInt();
                     if (CourseList.checkCode(coursecode) & CourseList.checkIndex(coursecode, indexnum)){
                         st.add_course(coursecode, indexnum);
                         break;
@@ -58,15 +62,52 @@ public class Application{
                     }
                 case 2:
                     System.out.print("Enter Course code: ");
-                    String course = sc.next();
+                    coursecode = sc.next();
                     System.out.print("Enter Index number: ");
-                    int index = sc.nextInt();
-                    st.drop_course(course, index);
+                    indexnum = sc.nextInt();
+                    st.drop_course(coursecode, indexnum);
                     break;
                 case 3:
                     st.check_course();
+                    break;
                 case 4:
+                    System.out.print("Enter course code: ");
+                    coursecode = sc.next();
+                    if (CourseList.checkCode(coursecode)){
+                        CourseList.checkVacancies(coursecode);
+                        break;
+                    }
+                    else{
+                        System.out.println("Error! Please enter a valid course code!");
+                        break;
+                    }
+                case 5:
+                    System.out.print("Enter course code: ");
+                    coursecode = sc.next();
+                    System.out.print("Enter current Index Number: ");
+                    indexnum = sc.nextInt();
+                    System.out.print("Enter new Index Number: ");
+                    index2 = sc.nextInt();
+                    if (CourseList.checkVacancies(indexnum)>0){
+                        st.drop_course(coursecode, indexnum);
+                        st.add_course(coursecode, index2);
+                        break;
+                    }
+                    else{
+                        System.out.println("Course index full! Please try again!");
+                        break;
+                    }
+                case 6:
+                    System.out.print("Enter course code: ");
+                    coursecode = sc.next();
+                    System.out.print("Enter current Index Number: ");
+                    indexnum =sc.nextInt();
+
+                    System.out.println("Enter the username of the student you want to swop with: ");
+                    String newuser = sc.next();
+                    Student newst = PersonList.getStudentByUsername(newuser);
                     
+
 
                     
             }

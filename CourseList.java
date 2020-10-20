@@ -25,8 +25,13 @@ public class CourseList {
 			if (parts.length >= 2)
 			{
 				String key = parts[0];
-				Course c1 = parts[1].readObject();
-				String value = parts[1];
+				String objectSia = parts[1];
+				String[] partSia = objectSia.split("|", 3);
+				if (partSia.length >= 3)
+				{
+					String courseCode = partSia[0];
+				}
+				//String value = parts[1];
 				mapCourse.put(key, value);
 			} else {
 				System.out.println("ignoring line: " + line);
@@ -120,7 +125,7 @@ public class CourseList {
 		
 		else
 		{
-
+			System.out.println("The course does not exist")
 		}
 	}
 	//  --for student to add new courses
@@ -131,8 +136,10 @@ public class CourseList {
 	//  --false = no more vacancies. Put on waitlist
 
 	public static boolean DropCourse(String coursecode, int index, String username) {
+		mapCourse.get(coursecode).dropCourse(index, username, false);
 		return true;
 	}
+	
 	//Dropcourse(String coursecode, int index, String username)
 	//  --for student to drop courses
 	//  --Similar to CourseList.addcourse
@@ -165,11 +172,19 @@ public class CourseList {
 		}
 	}
 
-	p
+	
 	//Swopcourse(String student1, String student2, int index1, int index 2, String coursecode)
 	//  --to swop index with students
 
-	//TODO: checkVacancies(String coursecode, int index)
+	public static void checkVacancies(String coursecode){ // For students to view the vacancy of all the index in the course
+		//print vacancies
+				
+	}
+
+	public static int checkVacancies(int indexnum){ //For admin to print out the van
+		//return num of vacancies
+		return mapCourse.get(indexnum).getIndexVacancy(indexnum);
+	}
 	//TODO: printStudentList(String coursecode, int index)
 
 }
