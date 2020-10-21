@@ -13,16 +13,16 @@ public class Admin extends Person{
 
     }
 
-    public void addStudent(String username, String name, String matric, char gender, String nationality){
-        PersonList.newStudent(username, name, matric, gender, nationality);
+    public void addStudent(String username, String name, String matric, char gender, String nationality, String major){
+        PersonList.newStudent(username, name, matric, gender, nationality, major);
         return;
     }
     public void removeStudent(String username) throws UserNotFound{
         PersonList.removeStudent(username);
     }
 
-    public void editStudent(String username, String name, String matric, char gender, String nationality) throws UserNotFound
-        PersonList.editStudentDetails(username, name, matric, gender, nationality);
+    public void editStudent(String username, String name, String matric, char gender, String nationality, String major) throws UserNotFound{
+        PersonList.editStudentDetails(username, name, matric, gender, nationality, major);
     }
 
     public void addCourse(){
@@ -38,5 +38,9 @@ public class Admin extends Person{
     }
     public void printByCourse(String coursecode){
         CourseList.printStudent(coursecode)
+    }
+
+    public String getMatric(){
+        return matricnum;
     }
 

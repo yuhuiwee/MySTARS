@@ -6,15 +6,19 @@ public class Student extends Person {
     private boolean swopstatus = false;
     private HashMap <Integer, Integer> pendingswap;
     private HashMap <Integer, Integer> successswap;
+    private String major;
+    private AccessPeriod acp;
 
-    public Student(String user, String name, String matric, char gender, String nationality){
+    public Student(String user, String name, String matric, char gender, String nationality, String major){
         this.username = user;
         this.name = name;
         this.matricnum = matric;
         this.gender = gender;
         this.nationality = nationality;
+        this.major = major;
         registered_courses = new HashMap<String, Integer>();
         waitlist_courses = new HashMap<String, Integer>();
+        this.acp = new AccessPeriod(major);
     }
 
     public void add_course(String course, int index){
@@ -102,4 +106,20 @@ public class Student extends Person {
     public void printStudentDetails(){
         System.out.printf("Name: %s, Gender: %s, Nationality: %s", name, gender, nationality);
     }
+
+    public String getMatric(){
+        return this.matricnum;
+    }
+    public String getUSername(){
+        return this.username;
+    }
+
+    public String getMajor(){
+        return this.major;
+    }
+
+    public AccessPeriod getAccessPeriod(){
+        return this.acp;
+    }
+}
 

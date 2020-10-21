@@ -11,33 +11,72 @@ public class CourseList {
 	//While its more logical to code top down, u have to keep visualising the codes downstream
 	//Ciding from bottom up means u can see ur downstream codes and make edits easier
 
-	private static HashMap<String, Course> mapCourse = new HashMap<String, Course>();
-
-	public static void readCourseList() {
-		String filePath = "test.txt";
-		//HashMap<String, String> map = new HashMap<String, String>();
+	private static HashMap<String, Course> mapCourse = null;
 	
-		String line;
-		BufferedReader reader = new BufferedReader(new FileReader(filePath));
-		while ((line = reader.readLine()) != null)
-		{
-			String[] parts = line.split(":", 2);
-			if (parts.length >= 2)
-			{
-				String key = parts[0];
-				String objectSia = parts[1];
-				String[] partSia = objectSia.split("|", 3);
-				if (partSia.length >= 3)
-				{
-					String courseCode = partSia[0];
-				}
-				//String value = parts[1];
-				mapCourse.put(key, value);
-			} else {
-				System.out.println("ignoring line: " + line);
-			}
-		}
+	public CourseList(){
+		mapCourse = new HashMap<String, Course>();
+
+		Course c1 = new Course("CZ2001", "Comp Sci", "Lect-Tuts-Lab");
+		Course c2 = new Course("CZ2002", "Comp Sci", "Lect-Tuts-Lab");
+		Course c3 = new Course("PH2018", "Philosophy", "Lect");
+
+		mapCourse.put("CZ2001", c1);
+		mapCourse.put("CZ2002", c2);
+		mapCourse.put("PH2018", c3);
+
+		//write to ser file
+
+        try{
+            FileOutputStream fos =
+                new FileOutputStream("CourseList.ser");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(mapCourse);
+            oos.close();
+            fos.close();
+        }
+        
+        catch(IOException ioe){
+            ioe.printStackTrace();
+        }
 	}
+
+	@SuppressWarnings("unchecked")
+    public static void loadCourseList(){
+        try
+        {
+         FileInputStream fis = new FileInputStream("CourseList.ser");
+         ObjectInputStream ois = new ObjectInputStream(fis);
+         Object temp = ois.readObject();
+         if(temp instanceof HashMap<?,?>){
+             mapCourse = (HashMap<String, Course>) temp;
+        }
+         ois.close();
+         fis.close();
+        }
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            new CourseList(); //If file not found, create default values
+        }
+        catch(ClassNotFoundException c){
+            System.out.println("Class not found");
+            c.printStackTrace();
+            new CourseList();
+      }
+	}
+	public static HashMap<Integer, IndexNum> getIndexList() {
+        //load hashmap if mapCourse is null
+        if (mapCourse==null){
+            CourseList.loadCourseList();
+        }
+
+        HashMap <Integer, IndexNum> temp = new HashMap<Integer, IndexNum>();
+        for (Map.Entry<String, Course> entry : mapCourse.entrySet()){
+            if (entry.getValue() instanceof IndexNum){
+                temp.put(entry.getKey(), (Course) entry.getValue());
+            }
+        }
+        return temp;
+    }
 	//Attributes needed: (Yes, literally only one attribute needed)
 	//Hashmap <String, Course>
 	//  --maps "CE2002" to Object CE2002
@@ -50,19 +89,15 @@ public class CourseList {
 	//----also update static hashmap attribut in this class
 	//----personally recommend this method as its safer :)
 
-	//Methods needed:
+	//PrintAll()
+	//  -- prints all courses in a list
+	//  --If yall very free, can also filter by school etc... but this isnt required
 	public void PrintAll() {
 		for (Map.Entry<String, Course> entry : mapCourse.entrySet()) {
 			System.out.println(entry.getKey());
 		}
 	}
-	//PrintAll()
-	//  -- prints all courses in a list
-	//  --If yall very free, can also filter by school etc... but this isnt required
-
-	public void PrintStudentCourse(String course, int index, String username) {
-
-	}
+		
 	//Print course(String course, int index)
 	//  --for student to print the courses they have registered for
 	
@@ -71,10 +106,91 @@ public class CourseList {
 	//YuHui: This hashmap only stores the course name and index. Need this method to call for course description details :)
 	//YuHui: But if we arent planning on displaying this info, then its ok.. Its just more convenient to add more deets in the future if we really need to.
 
-	//For method NewCourse, it is for the admin to add a totally new course into the list
-	public void NewCourse(String newCourseCode, String school, String courseType) 
-	{
+	//2 methods, print student list by index number
+	//			 print student list by course
+	public static Course getStudentListbyIndex(int indexNum) { //TODO: 
+		
+		if (mapCourse == null){
+            loadCourseList();
+		}
+		for (Course c : mapCourse.values() ){
+			if(c.getCourseCode() == courseCode){
+        if (mapCourse.containsKey(course){
+            return plist.get(username);
+        }
+        else{
+            throw new UserNotFound("User not found!");
+        }
 
+	}
+
+	public static void saveCourseMap(){
+        try{
+            FileOutputStream fos =
+                new FileOutputStream("CourseList.ser");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(mapCourse);
+            oos.close();
+            fos.close();
+            return;
+        }
+        
+        catch(IOException ioe){
+            ioe.printStackTrace();
+            return;
+        }
+	//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
+	//  --for admin to add new courses
+	//  --Create new Course object & set attributes
+	//  --adds newly created Course object to hashmap with String coursecode as key
+	//For method NewCourse, it is for the admin to add a totally new course into the list
+	
+	public void NewCourse(String courseCode, String school, String courseType) throws CourseAlreadyExist //Have to create this exception first
+	{
+		if (mapCourse == null){
+            CourseList.loadCourseList();
+        }
+
+		//Check if courseCode number already exist! If yes, different number must be entered
+		for (Course c : mapCourse.values() ){
+			if(c.getCourseCode() == courseCode){
+				throw new CourseAlreadyExist("This Course Code number already exist!");
+			}
+        }
+
+        Course c = new Course(courseCode, school, courseType);
+        mapCourse.put(courseCode, c);
+        CourseList.saveCourseMap(); //Save map immediately after creating new Course
+		return;
+	}
+
+	// IRS: Since the requirement didn't include remove course, should we not include it?
+
+	public void updateCourse(String currentCourseCode,String newCourseCode, String school, HashMap<int, indexNum>)
+	// TODO: insert the current course code as well
+	{
+		if (mapCourse == null){
+            CourseList.loadCourseList();
+        }
+		for (Course c : mapCourse.values() ){
+			if(c.getCourseCode() == currentCourseCode){
+				c.setcourseCode(newCourseCode);
+				c.setSchool(school);
+				//TODO: CHANGE INDEXNUM
+			}
+			else{
+				throw new CourseDontExist("This Course Code number does NOT exist!");	//Have to create new exception
+			}
+        }
+
+		/*else 
+		{
+			Course removedObject = mapCourse.remove(currentCourseCode);
+
+			Course a = new Course(newCourseCode, school, courseType);
+			mapCourse.put(newCourseCode, a);
+			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
+		}
 		if (mapCourse.containsKey(newCourseCode))
 		{
 			System.out.println("There is already an existing course code");
@@ -87,32 +203,11 @@ public class CourseList {
 			Course a = new Course(newCourseCode, school, courseType);
 			mapCourse.put(newCourseCode, a);
 			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
-		}
+		}*/
 
 	}
-
-	public void updateCourseCode(String currentCourseCode,String newCourseCode, String school, String courseType) // TODO: insert the current course code as well
-	{
-		if (mapCourse.containsKey(newCourseCode))
-		{
-			System.out.println("There is already an existing course code");
-			return;
-		}
-
-		else 
-		{
-			Course removedObject = mapCourse.remove(currentCourseCode);
-
-			Course a = new Course(newCourseCode, school, courseType);
-			mapCourse.put(newCourseCode, a);
-			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
-		}
 			
-	}//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
-	//  --for admin to add new courses
-	//  --Create new Course object & set attributes
-	//  --adds newly created Course object to hashmap with String coursecode as key
-
+	}
 	public void AddCourse(String coursecode, int index, String username) 
 	{
 		mapCourse.get(coursecode).addCourse(index,username);
@@ -188,3 +283,32 @@ public class CourseList {
 	//TODO: printStudentList(String coursecode, int index)
 
 }
+/*public static void readCourseList() {
+		String filePath = "test.txt";
+		//HashMap<String, String> map = new HashMap<String, String>();
+	
+		String line;
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
+		while ((line = reader.readLine()) != null)
+		{
+			String[] parts = line.split(":", 2);
+			if (parts.length >= 2)
+			{
+				String key = parts[0];
+				String objectSia = parts[1];
+				String[] partSia = objectSia.split("|", 3);
+				if (partSia.length >= 3)
+				{
+					String courseCode = partSia[0];
+					String school = partSia[1];
+					String courseType = partSia[2];
+
+					Course value = new Course(courseCode, school, courseType);
+					mapCourse.put(key, value);
+				}
+				//String value = parts[1];
+			} else {
+				System.out.println("ignoring line: " + line);
+			}
+		}
+	}*/

@@ -6,7 +6,7 @@ public class Course
     private String courseCode; 
     private String school;
     private String courseType; // lect/ lect + tuts / lect + tuts + lab
-    private String userName;
+    //private String userName;
     private HashMap<Integer, IndexNum> mapIndex; //The Integer in this case is the name of the IndexNum. So for
                                                 // example if i want to find for index 1024, i can simply use
                                                 // mapIndex.get(1024) to obtain the object indexNum.
