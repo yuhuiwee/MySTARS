@@ -7,9 +7,8 @@ import java.util.Map;
 
 public class AccessPeriod{
     
-    private static HashMap<String, ArrayList<ZonedDateTime>> majoracc = null; 
-    private ZonedDateTime start;
-    private ZonedDateTime end;
+    private static HashMap<String, ArrayList<ZonedDateTime>> majoracc = null;
+    private String majoryear;
     public static void CreateDefaultAccessPeriod(){
         //Default access period: 1st Nov 2020  to 30 Nov 2020 for all students
         ZonedDateTime start = ZonedDateTime.parse("2020-01-11T00:00:00+08:00[Asia/Singapore]");
@@ -70,7 +69,7 @@ public class AccessPeriod{
             current = current.withZoneSameInstant(ZoneId.of("Asia/Singapore"));
         }
 
-        if (current.isAfter(st.getEndDateTime()) & current.isBefore(st.getEndDateTime())){
+        if (current.isAfter(st.getStartDateTime()) & current.isBefore(st.getEndDateTime())){
             return true;
         }
         else{
@@ -84,35 +83,28 @@ public class AccessPeriod{
 
 
     //Constructor
-    public AccessPeriod(String major){
-        //Iterate through hashmap to get major. If not in hashmap, set start and end date as default
+    public AccessPeriod(String major, int year){
+        this.majoryear = String.join(",", major.toLowerCase(), String.valueOf(year));
+    }
+    private ArrayList<ZonedDateTime> getAccessPeriod(){
+        //Iterate through hashmap to get major, year. If not in hashmap, set start and end date as default
         if(majoracc == null){
             loadAccessPeriod();
         }
-
-        boolean notdefault = false;
         for (Map.Entry<String, ArrayList<ZonedDateTime>> e: majoracc.entrySet()){
-            if (e.getKey().toLowerCase()==major.toLowerCase()){
-                this.start = e.getValue().get(0);
-                this.end = e.getValue().get(1);
-                notdefault = true;
-                return;
+            if (e.getKey()==majoryear){
+                return e.getValue();
             }
         }
-
-        if (!notdefault){
-            this.start = majoracc.get("Default").get(0);
-            this.end = majoracc.get("Default").get(1);
-            return;
-        }
+        return majoracc.get("Default");
     }
 
     public ZonedDateTime getStartDateTime(){
-        return this.start;
+        return getAccessPeriod().get(0);
     }
 
     public ZonedDateTime getEndDateTime(){
-        return this.end;
+        return getAccessPeriod().get(1);
     }
 
 
@@ -129,7 +121,11 @@ public class AccessPeriod{
     public static void PrintALLaccess(){
         for (Map.Entry<String, ArrayList<ZonedDateTime>> entry : majoracc.entrySet()){
             if (entry.getKey()!="Default"){ //Print all but default
-                System.out.println(entry.getKey()+" major: ");
+                String majy = entry.getKey();
+                int index = majy.lastIndexOf(",");
+                String maj = majy.substring(0, index);
+                String y = majy.substring(index+1, majy.length());
+                System.out.println(maj+" major, Year"+y+": ");
                 System.out.println("Start Date: "+DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(entry.getValue().get(0)));
                 System.out.println("End Date: " + DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(entry.getValue().get(1)));
             }
@@ -137,15 +133,60 @@ public class AccessPeriod{
         System.out.println("Default Access Period: ");
         System.out.println("Start Date: "+DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(majoracc.get("Default").get(0)));
         System.out.println("Start Date: "+DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(majoracc.get("Default").get(0)));
+        return;
 
     }
 
-    public static void ChangeMajorAccess(String major){
-        if (majoracc.containsKey(major)){
-
+    public static void changeMajorAccess(String major, int year, ZonedDateTime start, ZonedDateTime end){
+        //Use for both adding and editing major access
+        String key = String.join(",", major.toLowerCase(), String.valueOf(year));
+        ArrayList<ZonedDateTime> temp = new ArrayList<ZonedDateTime>(2);
+        temp.add(start);
+        temp.add(end);
+        if (majoracc.containsKey(key)){
+            System.out.printf("Changing Access Period for %s, Year %d", major, year);
+            majoracc.replace(key, temp);
+            saveAccessPeriod();
+            return;
         }
         else{
-            
+            System.out.printf("Adding new Access Period for %s, Year %d", major,year);
+            majoracc.put(key, temp);
+            saveAccessPeriod();
+            return;
         }
+    }
+
+    public static void removeMajorAccess(String major, int year) throws AccessPeriodNotFound {
+        String key = String.join(",", major.toLowerCase(), String.valueOf(year));
+        if (majoracc.containsKey(key)){
+            System.out.printf("Removing Access Period for %s, Year %d", major, year);
+            saveAccessPeriod();
+            return;
+        }
+
+        else{
+            throw new AccessPeriodNotFound("Input Error! Access Period not found!");
+        }
+    }
+
+    public static void editDefaultAccess(ZonedDateTime start, ZonedDateTime end){
+        ArrayList<ZonedDateTime> temp = new ArrayList<ZonedDateTime>(2);
+        temp.add(start);
+        temp.add(end);
+
+        System.out.println("Changing Default Access Period");
+        majoracc.replace("Default", temp);
+        saveAccessPeriod();
+        return;
+    }
+
+    public static void removeAllbutDefault(){
+        ArrayList<ZonedDateTime> temp = new ArrayList<ZonedDateTime>(2);
+        temp = majoracc.get("Default");
+        majoracc.clear();
+        majoracc.put("Default", temp);
+        saveAccessPeriod();
+        return;
     }
 }

@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Course 
@@ -11,11 +12,14 @@ public class Course
                                                 // example if i want to find for index 1024, i can simply use
                                                 // mapIndex.get(1024) to obtain the object indexNum.
 
-    public Course(String courseCode, String school, String courseType) {
+                                              
+    
+
+    public Course(String courseCode, String school, String courseType, HashMap<Integer, IndexNum> indexhash) {
         this.courseCode = courseCode; 
         this.school = school;
         this.courseType = courseType;
-        mapIndex = new HashMap<Integer, IndexNum>();
+        this.mapIndex = indexhash;
 		//IndexNum I1 = new IndexNum("classSchedule", "venue", 30);
     }
 
@@ -29,6 +33,14 @@ public class Course
     } 
 	public String getCourseType() {
 		return courseType;
+    }
+
+    public Integer[] getListOfIndexKey(){
+        return mapIndex.keySet().toArray();
+    }
+
+    public HashMap<Integer, IndexNum> getIndexMap(int key) { // returning the list of index object 
+        return mapIndex;
     }
 
 	/* ----------- Set Methods -----------*/

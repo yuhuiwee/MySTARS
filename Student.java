@@ -8,14 +8,16 @@ public class Student extends Person {
     private HashMap <Integer, Integer> successswap;
     private String major;
     private AccessPeriod acp;
+    private int year;
 
-    public Student(String user, String name, String matric, char gender, String nationality, String major){
+    public Student(String user, String name, String matric, char gender, String nationality, String major, int year){
         this.username = user;
         this.name = name;
         this.matricnum = matric;
         this.gender = gender;
         this.nationality = nationality;
         this.major = major;
+        this.year = year;
         registered_courses = new HashMap<String, Integer>();
         waitlist_courses = new HashMap<String, Integer>();
         this.acp = new AccessPeriod(major);
@@ -69,10 +71,11 @@ public class Student extends Person {
     public void check_vacancies(){
         System.out.println("The vacancies for each index are as follows:");
         //TODO: print vacancies of each index
+        return;
     }
     public void swop_index(String cor, int newindex, String newstudentusername){
         int selfindex = registered_courses.get(cor);
-        boolean swaped = Swop.swopStudent(cor, selfindex, newindex, username, newstudentusername);
+        Swop.swopStudent(cor, selfindex, newindex, username, newstudentusername);
         if (swaped){
             System.out.println("Swap successful!");
         }

@@ -12,7 +12,8 @@ public class Swop {
         // To call .ser file at the start of the application!
         groups = new HashMap <String, ArrayList<Swopgroup>>();
     }
-    public static boolean swopStudent(String cor, int index1, int index2, String student1, String student2){
+    public static void swopStudent(String cor, int index1, int index2, String student1, String student2)
+            throws UserNotFound {
         String k;
         if (student1.compareTo(student2)>0){
             k = student1 + ":" + student2;            
@@ -31,27 +32,21 @@ public class Swop {
                 Swopgroup temp = i.next();
                 if (temp.getIndex1() == index1 & temp.getIndex2() == index2){
                     System.out.printf("Pending!\nWaiting for %s to swop", student2);
-                    return false;
-                    break;
-                    
+                    return;
                 }
                 else if (temp.getIndex1() == index2 & temp.getIndex2() == index1){
                     //getIndex1 == index of student that initiated
                     //index1 = current student's index
                     //TODO: assign method at CourseList
-                    CourseList.SwopCourse(cor, index1, student1);
-                    CourseList.SwopCourse(cor, index2, student2);
-                    CourseList.SwopCourse(cor, index1, student2);
-                    CourseList.SwopCourse(cor, index2, student1);
-                    
+                    CourseList.SwopCourse(student1, student2, index1, index2, cor);
                     // drop swopgroup class from array
                     courseswaplist.remove(temp);
                     //Call student by username and set swop status
                     PersonList.getStudentByUsername(student2).setSwopstatus(index2, index1);
                     temp = null; //remove object from memory
                     nobreak = false;
-                    return true;
-                    break;
+                    System.out.println("Swop Successful!");
+                    return;
                 }
             }
 
@@ -60,8 +55,10 @@ public class Swop {
                 Swopgroup newswop1 = new Swopgroup(student1, student2, index1, index2);
                 courseswaplist.add(newswop1);
                 groups.put(k, courseswaplist);
+                System.out.printf("Pending!\n You will be notified when swop is successful!", student2);
+                return;
+
             }
-            return true;
             
         }
         else{ //if student does not have existing swaps with student2
@@ -69,7 +66,8 @@ public class Swop {
             ArrayList<Swopgroup> temparray = new ArrayList<Swopgroup>();
             temparray.add(newswop);
             groups.put(k, temparray);
-            return false;
+            System.out.printf("Pending!\n You will be notified when swop is successful!", student2);
+            return;
         }
     }
     public static boolean dropswop(String student1, String student2, int index1, int index2){

@@ -71,7 +71,10 @@ public class CourseList {
 
         HashMap <Integer, IndexNum> temp = new HashMap<Integer, IndexNum>();
         for (Map.Entry<String, Course> entry : mapCourse.entrySet()){
-            if (entry.getValue() instanceof IndexNum){
+			if (entry.getValue() instanceof IndexNum){ //FIXME:What is this??
+													   //REPLY:Trying to get the IndexNum Hashmap inside Courselist Object, but not sure how.
+													   //@syadz You can have a method in course that returns index list (Course.getIndexList()). And use the mapCourse.getValue().getIndexList()
+													   //mapcourse.getValue() returns Course... It will never be an instanceof IndexNum...
                 temp.put(entry.getKey(), (Course) entry.getValue());
             }
         }
@@ -138,14 +141,15 @@ public class CourseList {
         catch(IOException ioe){
             ioe.printStackTrace();
             return;
-        }
+		}
+	}
 	//Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies, ...)
 	//  --for admin to add new courses
 	//  --Create new Course object & set attributes
 	//  --adds newly created Course object to hashmap with String coursecode as key
 	//For method NewCourse, it is for the admin to add a totally new course into the list
 	
-	public void NewCourse(String courseCode, String school, String courseType) throws CourseAlreadyExist //Have to create this exception first
+	public static void NewCourse(String courseCode, String school, String courseType) throws CourseAlreadyExist //Have to create this exception first
 	{
 		if (mapCourse == null){
             CourseList.loadCourseList();
@@ -166,7 +170,7 @@ public class CourseList {
 
 	// IRS: Since the requirement didn't include remove course, should we not include it?
 
-	public void updateCourse(String currentCourseCode,String newCourseCode, String school, HashMap<int, indexNum>)
+	public void updateCourse(String currentCourseCode,String newCourseCode, String school, HashMap<Integer, indexNum> )
 	// TODO: insert the current course code as well
 	{
 		if (mapCourse == null){
@@ -189,7 +193,8 @@ public class CourseList {
 
 			Course a = new Course(newCourseCode, school, courseType);
 			mapCourse.put(newCourseCode, a);
-			mapCourse.get(newCourseCode).setcourseCode(newCourseCode);
+			
+
 		}
 		if (mapCourse.containsKey(newCourseCode))
 		{
@@ -206,8 +211,6 @@ public class CourseList {
 		}*/
 
 	}
-			
-	}
 	public void AddCourse(String coursecode, int index, String username) 
 	{
 		mapCourse.get(coursecode).addCourse(index,username);
@@ -215,12 +218,12 @@ public class CourseList {
 
 		if (mapCourse.containsKey(coursecode))
 		{	
-			mapCourse.get(coursecode).addCourse(index, userName)
+			mapCourse.get(coursecode).addCourse(index, username);
 		}
 		
 		else
 		{
-			System.out.println("The course does not exist")
+			System.out.println("The course does not exist");
 		}
 	}
 	//  --for student to add new courses
@@ -231,8 +234,17 @@ public class CourseList {
 	//  --false = no more vacancies. Put on waitlist
 
 	public static boolean DropCourse(String coursecode, int index, String username) {
-		mapCourse.get(coursecode).dropCourse(index, username, false);
-		return true;
+		if (mapCourse.containsKey(coursecode))
+		{
+			mapCourse.get(coursecode).dropCourse(index, username, false);
+			return true;
+		}
+
+		else 
+		{
+			return false;
+		}
+
 	}
 	
 	//Dropcourse(String coursecode, int index, String username)
@@ -242,7 +254,7 @@ public class CourseList {
 	//  --true = successfully dropped course
 	//  --false = student not registered for that course index the first place.. so unable to drop
 
-	public void SwopCourse(String student1, String student2, int index1, int index 2, String coursecode){
+	public static void SwopCourse(String student1, String student2, int index1, int index2, String coursecode){
 		
 	}
 
@@ -281,6 +293,20 @@ public class CourseList {
 		return mapCourse.get(indexnum).getIndexVacancy(indexnum);
 	}
 	//TODO: printStudentList(String coursecode, int index)
+
+	public static void printStudentList(String coursecode){
+		//FIXME: Print all students by course code
+		return;
+	}
+	public static void printStudentList(int index){
+		//FIXME: print all students by index code;
+		return;
+	}
+
+	public static String getCoursecode(int index){
+		//FIXME: return the coursecode by index
+
+	}
 
 }
 /*public static void readCourseList() {
