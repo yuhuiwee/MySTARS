@@ -6,6 +6,4 @@ public abstract class Person {
      protected String nationality;
 
      public abstract String getMatric();
-     
-
 }
