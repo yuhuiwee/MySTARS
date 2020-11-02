@@ -9,17 +9,15 @@ public class Course implements Serializable {
     private static final long serialVersionUID = 1L;
     private String courseCode;
     private String school;
-    private String courseType; // lect/ lect + tuts / lect + tuts + lab
     // private String userName;
     private HashMap<Integer, IndexNum> mapIndex; // The Integer in this case is the name of the IndexNum. So for
                                                  // example if i want to find for index 1024, i can simply use
                                                  // mapIndex.get(1024) to obtain the object indexNum.
     private ArrayList<String> listOfRegisteredStudents;
 
-    public Course(String courseCode, String school, String courseType) {
+    public Course(String courseCode, String school) {
         this.courseCode = courseCode;
         this.school = school;
-        this.courseType = courseType;
         mapIndex = new HashMap<Integer, IndexNum>();
         listOfRegisteredStudents = new ArrayList<String>();
     }
@@ -34,10 +32,6 @@ public class Course implements Serializable {
         return school;
     }
 
-    public String getCourseType() {
-        return courseType;
-    }
-
     public int[] getIndexNumber() {
         int j = 0;
         int[] k = new int[mapIndex.size()];
@@ -47,13 +41,6 @@ public class Course implements Serializable {
         }
         return k;
     }
-
-    /*
-     * public Integer[] getListOfIndexKey(){ return mapIndex.keySet().toArray(); }
-     * 
-     * public HashMap<Integer, IndexNum> getIndexMap(int key) { // returning the
-     * list of index object return mapIndex; }
-     */
 
     /* ----------- Set Methods ----------- */
 
@@ -69,15 +56,6 @@ public class Course implements Serializable {
         mapIndex.put(key, value);
     }
 
-    public void updateCourseCode(String currentCourseCode, String newCourseCode) {
-        // FIXME: Is the handling of updating enough in the course list.
-        // TODO: How to find the course that they want to update
-    }
-    // Since Admin can add/update course, we have to include all the mutator methods
-    // of course. But since
-    // they can only change these 2 variables, we don't include the rest of the
-    // variables.
-
     /* ----------- Normal Methods ----------- */
 
     public boolean addCourse(int index, String userName) // for students to add course
@@ -92,10 +70,23 @@ public class Course implements Serializable {
         return true;
     }
 
+    public void updateCourseCode(String currentCourseCode, String newCourseCode) {
+        // FIXME: Is the handling of updating enough in the course list.
+        // TODO: How to find the course that they want to update
+    }
+    // Since Admin can add/update course, we have to include all the mutator methods
+    // of course. But since
+    // they can only change these 2 variables, we don't include the rest of the
+    // variables.
+
     /*
      * public int[] getCourseIndexVacancy() { for (Integer i : mapIndex.keySet())
      * return new int[] { i, mapIndex.get(i).getVacancy() }; }
      */
+
+    public int getIndexVacancy(int indexNum) {
+        return mapIndex.get(indexNum).getVacancy();
+    }
 
     public void printVacancy(int indexNum) {
         mapIndex.get(indexNum).getVacancy();
@@ -111,9 +102,17 @@ public class Course implements Serializable {
 
     public void printStudentListOfCourse() {
         System.out.println("\nStudent list of Course " + courseCode + ":\n");
+        if (listOfRegisteredStudents.size() == 0) {
+            System.out.println("<Empty>\n");
+        }
         for (int i = 0; i < listOfRegisteredStudents.size(); i++) {
             // TO DO: LINK TO STUDENT CLASS TO OBTAIN NAME, GENDER AND NATIONALITY
             System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
         }
+    }
+
+    public void printCourse() {
+        System.out.println("Course Info: " + courseCode);
+        System.out.println("School: " + school);
     }
 }

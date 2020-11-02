@@ -7,20 +7,16 @@ public class IndexNum implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private String day;
-    private String timeSlot;
-    private String venue;
     private int vacancy;
     private int indexNumber;
+    private ArrayList<ClassSchedule> classSchedule;
     private ArrayList<String> listOfRegisteredStudents;
     private ArrayList<String> waitingList;
 
-    public IndexNum(int indexNumber, String day, String timeSlot, String venue, int vacancy) {
+    public IndexNum(int indexNumber, int vacancy) {
         this.indexNumber = indexNumber;
-        this.day = day;
-        this.timeSlot = timeSlot;
-        this.venue = venue;
         this.vacancy = vacancy;
+        classSchedule = new ArrayList<ClassSchedule>();
         listOfRegisteredStudents = new ArrayList<String>(); // So when index 1024 created, it also creates
         waitingList = new ArrayList<String>(); // these 2 lists.
     }
@@ -29,18 +25,6 @@ public class IndexNum implements Serializable {
 
     public int getIndexNumber() {
         return indexNumber;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public String getTimeSlot() {
-        return timeSlot;
-    }
-
-    public String getVenue() {
-        return venue;
     }
 
     public int getVacancy() {
@@ -90,10 +74,27 @@ public class IndexNum implements Serializable {
         }
     }
 
+    public void addSchedule(ClassSchedule sch) {
+        classSchedule.add(sch); // Schedule object not created here as we might need a list which keeps records
+                                // of all schedule
+        // to prevent any clash in terms of timing or venue.
+    }
+
     public void printStudentListOfIndex() {
         System.out.println("\nStudent list of Course index number " + indexNumber + ":\n");
+        if (listOfRegisteredStudents.size() == 0) {
+            System.out.println("<Empty>\n");
+        }
         for (int i = 0; i < listOfRegisteredStudents.size(); i++) {
             System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
+        }
+    }
+
+    public void printIndex() {
+        System.out.println("Index Number Info: " + indexNumber);
+        System.out.println("Vacancy: " + vacancy);
+        for (int i = 0; i < classSchedule.size(); i++) {
+            classSchedule.get(i).printSchedule();
         }
     }
 }
