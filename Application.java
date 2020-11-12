@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Application {
 
-    public static void main(String[] args) throws UserNotFound, UserAlreadyExists, WrongPassword {
+    public static void main(String[] args) throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist {
 
         Scanner sc = new Scanner(System.in);
         Console con = System.console();
@@ -33,14 +33,14 @@ public class Application {
     }
 
     public static void StudentApp(Scanner sc, Student st, String username, Console con)
-            throws UserNotFound, UserAlreadyExists, WrongPassword {
+            throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist {
         String coursecode;
         int indexnum;
         int index2;
 
         System.out.println("Welcome to MySTARS!");
         if (st.getSwopStatus()) { // Notify student if swop is successful
-            st.printSwoppedlist();
+            st.printChanges();
         }
 
         int choice = 0;
@@ -57,8 +57,8 @@ public class Application {
                     coursecode = sc.next();
                     System.out.print("Enter Index number: ");
                     indexnum = sc.nextInt();
-                    if (CourseList.checkCode(coursecode) & CourseList.checkIndex(coursecode, indexnum)) {
-                        st.add_course(coursecode, indexnum);
+                    if (CourseList.checkCourseExistence(coursecode) & CourseList.checkIndex(coursecode, indexnum)) {
+                        st.addCourse(coursecode, indexnum);
                         break;
                     } else {
                         System.out.println("Error! Please enter a valid Course code / Index number");
@@ -69,15 +69,15 @@ public class Application {
                     coursecode = sc.next();
                     System.out.print("Enter Index number: ");
                     indexnum = sc.nextInt();
-                    st.drop_course(coursecode, indexnum);
+                    st.dropCourse(coursecode, indexnum);
                     break;
                 case 3: // Print registered courses
-                    st.check_course();
+                    st.checkCourse();
                     break;
                 case 4: // Check vacancies
                     System.out.print("Enter course code: ");
                     coursecode = sc.next();
-                    if (CourseList.checkCode(coursecode)) {
+                    if (CourseList.checkCourseExistence(coursecode)) {
                         CourseList.checkCourseVacancies(coursecode);
                         break;
                     } else {
@@ -92,8 +92,8 @@ public class Application {
                     System.out.print("Enter new Index Number: ");
                     index2 = sc.nextInt();
                     if (CourseList.checkVacancies(indexnum) > 0) {
-                        st.drop_course(coursecode, indexnum);
-                        st.add_course(coursecode, index2);
+                        st.dropCourse(coursecode, indexnum);
+                        st.addCourse(coursecode, index2);
                         break;
                     } else {
                         System.out.println("Course index full! Please try again!");
@@ -226,7 +226,7 @@ public class Application {
     // ========= Normal Methods =========
 
     // ****** Method to add new course ******
-    public static void NewCourse(Admin Admin) {
+    public static void NewCourse(Admin admin) {
         String venue, courseCode, school;
         int indexNum, vacancy, classNum, startTime, endTime, count, m;
         int classType = -1, weekType = -1, dayOfTheWeek = -1;
@@ -241,7 +241,7 @@ public class Application {
             courseCode = sc.nextLine();
             System.out.print("Enter the school: ");
             school = sc.nextLine();
-        } while (!(Admin.addNewCourse(courseCode, school)));
+        } while (!(admin.addNewCourse(courseCode, school)));
 
         System.out.print("Enter the total number index to add to course: ");
         count = sc.nextInt();
@@ -256,7 +256,7 @@ public class Application {
             indexNum = sc.nextInt();
             System.out.print("Enter the vacancy: ");
             vacancy = sc.nextInt();
-        } while (!(Admin.addNewIndexNum(courseCode, indexNum, vacancy)));
+        } while (!(admin.addNewIndexNum(courseCode, indexNum, vacancy)));
 
         System.out.println(
                 "\n==========================================================================================");
@@ -313,7 +313,7 @@ public class Application {
             venue = sc.nextLine();
             indexDetails = indexDetailsConverter(classType, weekType, dayOfTheWeek);
 
-            Admin.addNewSchedule(indexNum, indexDetails[0], indexDetails[1], indexDetails[2], startTime, endTime,
+            admin.addNewSchedule(indexNum, indexDetails[0], indexDetails[1], indexDetails[2], startTime, endTime,
                     venue);
             if (classType == 1) {
                 ClassSchedule lecture = new ClassSchedule("Lecture", indexDetails[1], indexDetails[2], startTime,
@@ -330,7 +330,7 @@ public class Application {
                 System.out.print("Enter the vacancy: ");
                 vacancy = sc.nextInt();
                 sc.nextLine();
-            } while (!(Admin.addNewIndexNum(courseCode, indexNum, vacancy)));
+            } while (!(admin.addNewIndexNum(courseCode, indexNum, vacancy)));
             System.out.println(
                     "\n==========================================================================================");
             System.out.print(
@@ -342,7 +342,7 @@ public class Application {
             System.out.println("All lectures have been added automatically!");
             for (int l = 0; l < classArrayTypes.size(); l++) {
                 if (classArrayTypes.get(l) == 1) {
-                    Admin.addNewSchedule(indexNum, lectures.get(m));
+                    admin.addNewSchedule(indexNum, lectures.get(m));
                     m++;
                 } else {
                     indexDetails = indexDetailsConverter(classArrayTypes.get(l), 1, 1); // 1 are just dummy units
@@ -379,7 +379,7 @@ public class Application {
                     sc.nextLine();
                     venue = sc.nextLine();
                     indexDetails = indexDetailsConverter(classArrayTypes.get(l), weekType, dayOfTheWeek);
-                    Admin.addNewSchedule(indexNum, indexDetails[0], indexDetails[1], indexDetails[2], startTime,
+                    admin.addNewSchedule(indexNum, indexDetails[0], indexDetails[1], indexDetails[2], startTime,
                             endTime, venue);
                 }
             }
@@ -500,8 +500,7 @@ public class Application {
     }
 
     // ****** Method to make sure the indexnum entered exist in database. ******
-    public static int checkIndexNumExistence() {
-        Scanner sc = new Scanner(System.in);
+    public static int checkIndexNumExistence(Scanner sc) {
         int indexNum;
         do {
             System.out.print("Please enter the index number you want to query: ");
@@ -524,7 +523,7 @@ public class Application {
     // ****** Method to print all indexes in existence ******
     public static void printAllIndexes() {
         System.out.println("\nCurrent Indexes available:");
-        CourseList.PrintAllIndex();
+        CourseList.printAllIndex();
     }
 
     // ****** Method to print index vacancy ******
@@ -547,7 +546,7 @@ public class Application {
     // ****** Method to print out all courses in existence ******
     public static void printAllCourses() {
         System.out.println("\nCurrent courses available:");
-        CourseList.PrintAllCourse();
+        CourseList.printAllCourse();
     }
 
     // ****** Method to print student list by coursecode ******

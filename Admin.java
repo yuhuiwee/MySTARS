@@ -64,16 +64,11 @@ public class Admin extends Person implements Serializable {
         // TODO: Similar to what was mentioned below
     }
 
-    public void printByCourse(String coursecode) {
-        CourseList.printStudentByCourse(coursecode);
+    public void printByCourse(String courseCode) {
+        CourseList.printStudentByCourse(courseCode);
         // TODO: The method above obtains the Student name, so we have to get details of
         // the student's gender and nationality by using
         // some Student method. Also perhaps we might have to store the student ID
         // instead in the Course class since ID is unique
         // but not student name.
     }
-
-    public String getMatric() {
-        return matricnum;
-    }
-}

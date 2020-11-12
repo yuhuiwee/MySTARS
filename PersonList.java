@@ -94,19 +94,6 @@ public class PersonList {
         return temp;
     }
 
-    public static Student getStudentByUsername(String username) throws UserNotFound, UserAlreadyExists {
-        if (plist == null) {
-            loadPersonList();
-        }
-
-        Person p = getByUsername(username);
-        if (p instanceof Student) {
-            return (Student) p;
-        } else {
-            throw new UserNotFound("Student not found");
-        }
-    }
-
     public static void savePersonMap() {
         try {
             FileOutputStream fos = new FileOutputStream("PersonList.ser");
@@ -205,22 +192,6 @@ public class PersonList {
             }
         }
         return temp;
-    }
-
-    public static Admin getAdminByUsername(String username) throws UserNotFound, UserAlreadyExists {
-        if (plist == null) {
-            loadPersonList();
-        }
-
-        if (plist.containsKey(username)) {
-            if (plist.get(username) instanceof Admin) {
-                return (Admin) plist.get(username);
-            } else {
-                throw new UserNotFound("Admin not found!");
-            }
-        } else {
-            throw new UserNotFound("Admin not found!");
-        }
     }
 
     public static void editAdmin(String username, String name, String id, char gender, String nationality,

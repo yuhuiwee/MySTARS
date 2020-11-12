@@ -52,15 +52,15 @@ public class CourseList {
 		indexList.put(1028, i5);
 		indexList.put(1029, i6);
 
-		getIndexObject(1024).addSchedule(sc1);
-		getIndexObject(1024).addSchedule(sc2);
-		getIndexObject(1025).addSchedule(sc1);
-		getIndexObject(1026).addSchedule(sc4);
-		getIndexObject(1027).addSchedule(sc4);
-		getIndexObject(1028).addSchedule(sc5);
-		getIndexObject(1028).addSchedule(sc6);
-		getIndexObject(1029).addSchedule(sc5);
-		getIndexObject(1029).addSchedule(sc7);
+		indexList.get(1024).addSchedule(sc1);
+		indexList.get(1024).addSchedule(sc2);
+		indexList.get(1025).addSchedule(sc1);
+		indexList.get(1026).addSchedule(sc4);
+		indexList.get(1027).addSchedule(sc4);
+		indexList.get(1028).addSchedule(sc5);
+		indexList.get(1028).addSchedule(sc6);
+		indexList.get(1029).addSchedule(sc5);
+		indexList.get(1029).addSchedule(sc7);
 
 		mapCourse.get("CZ2001").setIndexNumber(1024, indexList.get(1024));
 		mapCourse.get("CZ2001").setIndexNumber(1025, indexList.get(1025));
@@ -71,17 +71,7 @@ public class CourseList {
 
 		// write to ser file
 
-		try {
-			FileOutputStream fos = new FileOutputStream("CourseList.ser");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(mapCourse);
-			oos.close();
-			fos.close();
-		}
-
-		catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
+		saveCourseMap();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -103,6 +93,24 @@ public class CourseList {
 			// c.printStackTrace();
 			new CourseList();
 		}
+
+		try {
+			FileInputStream fis = new FileInputStream("IndexList.ser");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			Object temp = ois.readObject();
+			if (temp instanceof HashMap<?, ?>) {
+				indexList = (HashMap<Integer, IndexNum>) temp;
+			}
+			ois.close();
+			fis.close();
+		} catch (IOException ioe) {
+			// ioe.printStackTrace();
+			new CourseList(); // If file not found, create default values
+		} catch (ClassNotFoundException c) {
+			// System.out.println("Class not found");
+			// c.printStackTrace();
+			new CourseList();
+		}
 	}
 
 	public static void saveCourseMap() {
@@ -110,6 +118,19 @@ public class CourseList {
 			FileOutputStream fos = new FileOutputStream("CourseList.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(mapCourse);
+			oos.close();
+			fos.close();
+		}
+
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+			return;
+		}
+
+		try {
+			FileOutputStream fos = new FileOutputStream("IndexList.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(indexList);
 			oos.close();
 			fos.close();
 			return;
@@ -122,48 +143,68 @@ public class CourseList {
 	}
 
 	// ****** Method to print student by index ******
-	public static void printStudentByIndex(int index) {
-		getIndexObject(index).printStudentListOfIndex();
+	public static void printStudentByIndex(int indexNum) {
+		System.out.println("\nStudent list of Course index number " + indexNum + ":\n");
+		ArrayList<String> students = indexList.get(indexNum).getRegisteredStudentList();
+		for (int i = 0; i < students.size(); i++) {
+			System.out.println((i + 1) + ") " + students.get(i));
+		}
+		if (students.size() == 0) {
+			System.out.println("<Empty>\n");
+		}
 	}
 
 	// ****** Method to print student by course ******
 	public static void printStudentByCourse(String courseCode) {
-		getCourseObject(courseCode).printStudentListOfCourse();
+		System.out.println("\nStudent list of Course " + courseCode + ":\n");
+		int[] temp = mapCourse.get(courseCode).getIndexNumber();
+		ArrayList<String> temp2 = new ArrayList<>();
+		ArrayList<String> students = new ArrayList<>();
+		for (int i = 0; i < temp.length; i++) {
+			temp2 = indexList.get(temp[i]).getRegisteredStudentList();
+			for (int j = 0; j < temp2.size(); j++) {
+				students.add(temp2.get(j));
+			}
+			temp2.clear();
+		}
+		for (int k = 0; k < students.size(); k++) {
+			System.out.println((k + 1) + ") " + students.get(k));
+		}
+		if (students.size() == 0) {
+			System.out.println("<Empty>\n");
+		}
 	}
 
 	// ****** Method to print all courses in existence ******
-	public static void PrintAllCourse() {
+	public static void printAllCourse() {
 		for (String i : mapCourse.keySet()) {
 			System.out.println(i);
 		}
 	}
 
 	// ****** Method to print all Indexes in existence ******
-	public static void PrintAllIndex() {
+	public static void printAllIndex() {
+		Integer temp[] = new Integer[indexList.size()];
 		for (Integer i : indexList.keySet()) {
+
 			System.out.println(i);
 		}
 	}
 
 	// ****** Method to print course info ******
 	public static void printCourseInfo(String courseCode) {
-		getCourseObject(courseCode).printCourse();
+		mapCourse.get(courseCode).printCourse();
 	}
 
 	// ****** Method to print all indexes in a course ******
 	public static void printIndexOfCourse(String courseCode) {
-		int[] temp = getCourseIndex(courseCode);
+		int[] temp = mapCourse.get(courseCode).getIndexNumber();
 		System.out.println("Total Index Numbers of " + courseCode + " : " + temp.length);
 		for (int i = 0; i < temp.length; i++) {
 			System.out.println("========================");
-			getIndexObject(temp[i]).printIndex();
+			indexList.get(temp[i]).printIndex();
 		}
 		System.out.println("========================\n");
-	}
-
-	// ****** Method to get course object from hashmap ******
-	public static Course getCourseObject(String courseCode) {
-		return mapCourse.get(courseCode);
 	}
 
 	// ****** Method to check course existence ******
@@ -176,11 +217,6 @@ public class CourseList {
 		}
 	}
 
-	// ****** Method to GET all indexes in that course ******
-	public static int[] getCourseIndex(String courseCode) {
-		return getCourseObject(courseCode).getIndexNumber();
-	}
-
 	// ****** Method to check index existence ******
 	public static boolean checkIndexExistence(int indexNum) {
 		if (indexList.containsKey(indexNum))
@@ -191,12 +227,7 @@ public class CourseList {
 		}
 	}
 
-	// ****** Method to GET index object from hashmap ******
-	public static IndexNum getIndexObject(Integer indexNum) {
-		return indexList.get(indexNum);
-	}
-
-	public static void NewCourse(String courseCode, String school, String courseType) throws CourseAlreadyExist {
+	public static void NewCourse(String courseCode, String school) throws CourseAlreadyExist {
 		// Since we are simply adding the new course to the Courselist hashmap, we must
 		// make sure the hashmap
 		// exist in the first place. In case we cannot load the serealized file.
@@ -227,7 +258,7 @@ public class CourseList {
 		// indexNumber by a timetable class
 		IndexNum i = new IndexNum(indexNumber, vacancy);
 		indexList.put(indexNumber, i);
-		mapCourse.get(courseCode).setIndexNumber(indexNumber, getIndexObject(indexNumber));
+		mapCourse.get(courseCode).setIndexNumber(indexNumber, indexList.get(indexNumber));
 		CourseList.saveCourseMap();
 	}
 
@@ -237,14 +268,14 @@ public class CourseList {
 		// TODO: Check whether the day, timeSlot and venue clashes with other
 		// indexNumber by a timetable class
 		ClassSchedule sc = new ClassSchedule(classType, weekType, dayOfTheWeek, startTime, endTime, venue);
-		getIndexObject(indexNumber).addSchedule(sc);
+		indexList.get(indexNumber).addSchedule(sc);
 		// CourseList.saveCourseMap();
 	}
 
 	// ****** Similar to above except create similar lecture schedules for each
 	// index number in the same course ******
 	public static void newSchedule(int indexNumber, ClassSchedule lecture) {
-		getIndexObject(indexNumber).addSchedule(lecture);
+		indexList.get(indexNumber).addSchedule(lecture);
 		// CourseList.saveCourseMap();
 	}
 
@@ -252,7 +283,7 @@ public class CourseList {
 	// include it?
 
 	public void updateCourse(String currentCourseCode, String newCourseCode, String school,
-			HashMap<Integer, indexNum> smthg)
+			HashMap<Integer, IndexNum> smthg)
 	// TODO: insert the current course code as well
 	{
 		if (mapCourse == null) {
@@ -272,15 +303,15 @@ public class CourseList {
 
 	}
 
-	public static boolean AddCourse(String coursecode, int index, String username) {
+	public static boolean AddCourse(String coursecode, int index, String username) throws CourseDontExist {
 		if (mapCourse.containsKey(coursecode)) {
-			mapCourse.get(coursecode).addCourse(index, username);
-			return true;
+			boolean bool = mapCourse.get(coursecode).addCourse(index, username);
+			return bool;
 		}
 
 		else {
-			System.out.println("The course does not exist!\n");
-			return false;
+			throw new CourseDontExist("The course does not exist!\n");
+
 		}
 	}
 	// --for student to add new courses
@@ -290,14 +321,15 @@ public class CourseList {
 	// --true = successfully added
 	// --false = no more vacancies. Put on waitlist
 
-	public static boolean DropCourse(String coursecode, int index, String username) {
+	public static void DropCourse(String coursecode, int index, String username)
+			throws CourseDontExist, UserNotFound, UserAlreadyExists {
 		if (mapCourse.containsKey(coursecode)) {
-			mapCourse.get(coursecode).dropCourse(index, username, false);
-			return true;
+			mapCourse.get(coursecode).dropCourse(index, username, false);// swopflag=false
+			return;
 		}
 
 		else {
-			return false;
+			throw new CourseDontExist("The course does not exist!\n");
 		}
 
 	}
@@ -310,15 +342,26 @@ public class CourseList {
 	// --false = student not registered for that course index the first place.. so
 	// unable to drop
 
-	public static void SwopCourse(String student1, String student2, int index1, int index2, String coursecode) {
+	public static void SwopCourse(String student1, String student2, int index1, int index2, String coursecode)
+			throws UserNotFound, UserAlreadyExists, CourseDontExist {
+		if (mapCourse.containsKey(coursecode)) {
+			Course c = mapCourse.get(coursecode);
+			c.dropCourse(index1, student1, true);
+			c.dropCourse(index2, student2, true);
+			c.addCourse(index1, student2);
+			c.addCourse(index2, student1);
+			return;
 
+		} else {
+			throw new CourseDontExist("The course does not exist!\n");
+		}
 	}
 
 	// ****** Method to check course vacancy ******
 	public static void checkCourseVacancies(String coursecode) { // For students to view the vacancy of all the index in
 																	// course
 
-		int[] temp = getCourseIndex(coursecode);
+		int[] temp = mapCourse.get(courseCode).getIndexNumber();
 		System.out.println("Vacancy for course " + coursecode);
 		System.out.println("Index/Vacancy ");
 		for (int i = 0; i < temp.length; i++) {
@@ -328,13 +371,13 @@ public class CourseList {
 
 	// ****** Method to check index vacancy ******
 	public static int checkVacancies(Integer indexNum) {
-		return getIndexObject(indexNum).getVacancy();
+		return indexList.get(indexNum).getVacancy();
 	}
 
 	public static boolean checkIndex(String coursecode, int index) {
 		if (mapCourse.containsKey(coursecode)) {
 			Course c = mapCourse.get(coursecode);
-			return c.checkIndex(index);
+			return c.checkIndex(index); // true if index matches false otherwise
 		}
 
 		else {
@@ -347,6 +390,22 @@ public class CourseList {
 	// --to swop index with students
 
 }
+
+// ****** Method to GET index object from hashmap ******
+// public static IndexNum getIndexObject(Integer indexNum) {
+// return indexList.get(indexNum);
+// }
+
+// ****** Method to GET all indexes in that course ******
+// public static int[] getCourseIndex(String courseCode) {
+// return mapCourse.get(courseCode).getIndexNumber();
+// }
+
+// ****** Method to get course object from hashmap ******
+// public static Course getCourseObject(String courseCode) {
+// return mapCourse.get(courseCode);
+// }
+
 /*
  * public static void readCourseList() { String filePath = "test.txt";
  * //HashMap<String, String> map = new HashMap<String, String>();

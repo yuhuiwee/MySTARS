@@ -30,7 +30,10 @@ public class IndexNum implements Serializable {
     public int getVacancy() {
         return vacancy;
     }
-    // public int getIndexNumber(){ return indexNum; }
+
+    public ArrayList<String> getRegisteredStudentList() {
+        return listOfRegisteredStudents;
+    }
 
     /* ----------- Set Methods ----------- */
 
@@ -44,33 +47,47 @@ public class IndexNum implements Serializable {
 
     /* ----------- Normal Methods ----------- */
 
-    public void addStudent(String username) {
+    public boolean addStudent(String username) {
         // So there will be list of students available in application
         // But this will be initiated by the student class
         if (vacancy > 0) {
             listOfRegisteredStudents.add(username);
             vacancy--;
             System.out.println("You have been added to the index." + this.indexNumber + ".");
-
+            return true;
         } else {
             waitingList.add(username);
             System.out.println("There are no vacancy left in this index. You have been placed in the waitlist.");
+            return false;
         }
     }
 
-    public void removeStudent(String username, boolean swopFlag) // flag is for the swop to happen without adding in the
-                                                                 // students in the waiting list
-    {
-        listOfRegisteredStudents.remove(username);
+    // TODO: Edited method input variables... please change in class diag
+    public void removeStudent(String coursecode, String username, boolean swopFlag)
+            throws UserNotFound, UserAlreadyExists {
+        // flag is for the swop to happen without adding in the students in the waiting
+        // list
+
+        if (listOfRegisteredStudents.contains(username)) {
+            listOfRegisteredStudents.remove(username);
+        } else {
+            waitingList.remove(username);
+        }
+
         System.out.println("You have been removed from the index.");
         if (swopFlag || waitingList.isEmpty()) // Swop flag = True -> Just Increase vacancy without adding Students from
                                                // waitlist
         {
             vacancy++;
-        } else {
+            return;
+
+        } else {// swopflag is false
             listOfRegisteredStudents.add(waitingList.get(0));
+            Student st = (Student) PersonList.getByUsername(waitingList.get(0));
+            st.WaitingToRegistered(coursecode, indexNumber); // inform student of swop
             waitingList.remove(0);
-            // TODO: Notify student of successful allocation by the API.
+            return;
+
         }
     }
 
@@ -80,15 +97,14 @@ public class IndexNum implements Serializable {
         // to prevent any clash in terms of timing or venue.
     }
 
-    public void printStudentListOfIndex() {
-        System.out.println("\nStudent list of Course index number " + indexNumber + ":\n");
-        if (listOfRegisteredStudents.size() == 0) {
-            System.out.println("<Empty>\n");
-        }
-        for (int i = 0; i < listOfRegisteredStudents.size(); i++) {
-            System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
-        }
-    }
+    // public void printStudentListOfIndex() {
+    // if (listOfRegisteredStudents.size() == 0) {
+    // System.out.println("<Empty>\n");
+    // }
+    // for (int i = 0; i < listOfRegisteredStudents.size(); i++) {
+    // System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
+    // }
+    // }
 
     public void printIndex() {
         System.out.println("Index Number Info: " + indexNumber);

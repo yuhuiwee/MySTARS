@@ -7,14 +7,13 @@ public class Student extends Person implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    private HashMap<String, Integer> registered_courses;
-
-    private HashMap<String, Integer> waitlist_courses;
-    private boolean swopstatus = false;
-    private HashMap<Integer, Integer> pendingswap;
-    private HashMap<Integer, Integer> successswap;
+    private HashMap<String, Integer> registeredCourses;
+    private HashMap<String, Integer> waitlistCourses;
+    private boolean changeStatus = false;
+    private HashMap<Integer, Integer> pendingSwap;
+    private HashMap<String, ArrayList<Integer>> successChange;
     private String major;
-    private AccessPeriod acp;
+    private AccessPeriod accessTime;
     private int year;
 
     public Student(String user, String name, String matric, char gender, String nationality, String major, int year) {
@@ -25,104 +24,121 @@ public class Student extends Person implements Serializable {
         this.nationality = nationality;
         this.major = major;
         this.year = year;
-        registered_courses = new HashMap<String, Integer>();
-        waitlist_courses = new HashMap<String, Integer>();
-        this.acp = new AccessPeriod(major, year);
+        registeredCourses = new HashMap<String, Integer>();
+        waitlistCourses = new HashMap<String, Integer>();
+        this.accessTime = new AccessPeriod(major, year);
     }
 
-    public void add_course(String course, int index) {
-        // TODO: change CourseList.addcourse to static method
+    public void addCourse(String course, int index) throws CourseDontExist {
         boolean courseadd = CourseList.AddCourse(course, index, username); // CourseList.add returns boolean
         if (courseadd) {
             System.out.println("Course added successfully!");
-            registered_courses.put(course, index);
+            registeredCourses.put(course, index);
         } else {
             System.out.println("Course index is full! You will be put on waitlist!");
-            waitlist_courses.put(course, index);
+            waitlistCourses.put(course, index);
 
         }
     };
 
-    public void drop_course(String course, int index) {
-        if (waitlist_courses.containsKey(course) & waitlist_courses.get(course) == index) {
-            waitlist_courses.remove(course);
-            boolean coursedrop = CourseList.DropCourse(course, index, username); // CourseList.drop returns boolean
-            if (!coursedrop) {
-                System.out.println("Error in coding!"); // Should only return true
-            }
-        } else if (registered_courses.containsKey(course) & registered_courses.get(course) == index) {
-            registered_courses.remove(course);
-            boolean coursedrop = CourseList.DropCourse(course, index, username); // CourseList.drop returns boolean
-            if (!coursedrop) {
-                System.out.println("Error in coding!"); // Should only return true
-            }
-        } else {
-            System.out.println("Error! You are not registered for this course");
+    public void dropCourse(String course, int index) throws CourseDontExist, UserNotFound, UserAlreadyExists {
+        int verify = verifyCourse(course);
+        if (verify == -1) {
+            throw new CourseDontExist("You are not registered for this course!");
+        } else if (verify != index) {
+            throw new CourseDontExist("You are not registered for this course!");
+        }
+        CourseList.DropCourse(course, index, username);
+        if (waitlistCourses.containsKey(course)) {
+            waitlistCourses.remove(course);
+
+        } else if (registeredCourses.containsKey(course)) {
+            registeredCourses.remove(course);
         }
     };
 
-    public void check_course() {
+    public void checkCourse() {
 
         System.out.println("Registered Courses");
-        for (Map.Entry<String, Integer> entry : registered_courses.entrySet()) {
+        for (Map.Entry<String, Integer> entry : registeredCourses.entrySet()) {
             System.out.println(entry.getKey() + "," + entry.getValue());
         }
 
         System.out.println("Courses on Waitlist");
-        for (Map.Entry<String, Integer> entry : waitlist_courses.entrySet()) {
+        for (Map.Entry<String, Integer> entry : waitlistCourses.entrySet()) {
             System.out.println(entry.getKey() + "," + entry.getValue());
         }
     }
 
-    public void check_vacancies() {
+    public void checkVacancies() {
         System.out.println("The vacancies for each index are as follows:");
         // TODO: print vacancies of each index
         return;
     }
 
-    public void swop_index(String cor, int newindex, String newstudentusername) throws UserNotFound, UserAlreadyExists {
-        int selfindex = registered_courses.get(cor);
-        boolean swaped = Swop.swopStudent(cor, selfindex, newindex, username, newstudentusername);
-        if (swaped) {
-            System.out.println("Swap successful!");
-        } else {
+    public void swopIndex(String course, int selfIndex, int newIndex, String newStudentUsername)
+            throws UserNotFound, UserAlreadyExists, CourseDontExist, CourseAlreadyExist {
+        int verify = verifyCourse(course);
+        if (verify == -1) {
+            throw new CourseDontExist("You are not registered for this course!");
+        } else if (verify != selfIndex) {
+            throw new CourseDontExist("You are not registered for this course!");
+        }
 
-            pendingswap.put(selfindex, newindex);
+        if (pendingSwap.containsKey(selfIndex)) {
+            throw new CourseAlreadyExist("You already have a pending swap with this course index!");
+        }
+
+        boolean swaped = Swop.swopStudent(course, selfIndex, newIndex, username, newStudentUsername);
+        if (swaped) {// if true, swap successful
+            registeredCourses.replace(course, selfIndex, newIndex);
+            System.out.println("Swap successful!");
+
+        } else {// pending swap
+            pendingSwap.put(selfIndex, newIndex);
         }
 
     }
 
     public boolean getSwopStatus() {
         // If true call printswoppedlist()
-        return swopstatus;
+        return changeStatus;
     }
 
-    public void setSwopstatus(int index1, int index2) {
-        this.swopstatus = true; // set true when swap with student2 successful
-        pendingswap.remove(index1); // remove from pending
-        successswap.put(index1, index2);
+    public void setSwopstatus(int index1, int index2, String course) {
+        this.changeStatus = true; // set true when swap with student2 successful
+        pendingSwap.remove(index1); // remove from pending
+        ArrayList<Integer> s = new ArrayList<Integer>();
+        s.add(index1);
+        s.add(index2);
+        successChange.put(course, s);
+        registeredCourses.replace(course, index1, index2); // replace with swopped index
 
     }
 
-    public void printSwoppedlist() {
+    public void printChanges() {
         // Print list of courses successfully swopped
-        for (Map.Entry<Integer, Integer> entry : successswap.entrySet()) {
-            System.out.println(
-                    "Successfullly swapped Course Index " + entry.getKey() + " to Course Index " + entry.getValue());
+        if (successChange != null) {
+            for (Map.Entry<String, ArrayList<Integer>> entry : successChange.entrySet()) {
+                ArrayList<Integer> s = entry.getValue();
+                if (s.size() == 2) {
+                    System.out.println("Successfullly swapped " + entry.getKey() + " from index " + s.get(0)
+                            + " to index " + s.get(1));
+                } else if (s.size() == 1) {
+                    System.out.println(
+                            "You have been registered for " + entry.getKey() + " with course index " + s.get(0));
+                }
+
+            }
+            successChange = null; // remove swop from hashmap
         }
-        this.swopstatus = false; // reset swop status
+
+        this.changeStatus = false; // reset swop status
+
     }
 
     public void printStudentDetails() {
-        System.out.printf("Name: %s, Gender: %s, Nationality: %s", name, gender, nationality);
-    }
-
-    public String getMatric() {
-        return this.matricnum;
-    }
-
-    public String getUSername() {
-        return this.username;
+        System.out.printf("Name: %s, Gender: %s, Nationality: %s, Year: %d", name, gender, nationality, year);
     }
 
     public String getMajor() {
@@ -130,16 +146,56 @@ public class Student extends Person implements Serializable {
     }
 
     public AccessPeriod getAccessPeriod() {
-        return this.acp;
+        return this.accessTime;
     }
 
-    public void dropAllCourse() {
-        for (Map.Entry<String, Integer> entry : registered_courses.entrySet()) {
-            drop_course(entry.getKey(), entry.getValue());
+    public void dropAllCourse() throws CourseDontExist, UserNotFound, UserAlreadyExists {
+        for (Map.Entry<String, Integer> entry : registeredCourses.entrySet()) {
+            dropCourse(entry.getKey(), entry.getValue());
         }
 
-        for (Map.Entry<String, Integer> entry : waitlist_courses.entrySet()) {
-            drop_course(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Integer> entry : waitlistCourses.entrySet()) {
+            dropCourse(entry.getKey(), entry.getValue());
         }
+        registeredCourses = null;
+        waitlistCourses = null;
+    }
+
+    public void WaitingToRegistered(String course, int indexnum) {
+        // TODO: Add email API HERE!!
+        changeStatus = true;
+
+        ArrayList<Integer> s = new ArrayList<Integer>();
+        s.add(indexnum);
+        successChange.put(course, s);
+
+        waitlistCourses.remove(course);
+        registeredCourses.put(course, indexnum);
+    }
+
+    private int verifyCourse(String course) {
+        if (registeredCourses.containsKey(course)) {
+            return registeredCourses.get(course);
+        } else if (waitlistCourses.containsKey(course)) {
+            return waitlistCourses.get(course);
+        } else {
+            return -1;
+        }
+    }
+
+    public void dropSwap(String course, int selfindex, String student2) throws CourseDontExist {
+        if (!pendingSwap.containsKey(selfindex)) {// check if index is registered
+            throw new CourseDontExist("You dont have any pending swaps with this index!");
+        } else if (!CourseList.checkIndex(course, selfindex)) {
+            throw new CourseDontExist("This index does not exist for this course!");
+        } else {
+            boolean b = Swop.dropSwop(username, student2, selfindex);
+            if (b) {
+                pendingSwap.remove(selfindex);
+                System.out.println("Successfully dropped the Course Swop");
+                return;
+            }
+        }
+        return;
     }
 }
