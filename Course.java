@@ -6,6 +6,8 @@ public class Course implements Serializable {
     /**
      *
      */
+
+    private static ArrayList<String> schoolType;
     private static final long serialVersionUID = 1L;
     private String courseCode;
     private String school;
@@ -18,9 +20,26 @@ public class Course implements Serializable {
         this.courseCode = courseCode;
         this.school = school;
         mapIndex = new HashMap<Integer, IndexNum>();
-        listOfRegisteredStudents = new ArrayList<String>();
     }
 
+    public static void createSchoolType() {
+        schoolType = new ArrayList<String>();
+        schoolType.add("Computer Science");
+        schoolType.add("Engineering");
+        schoolType.add("Philodophy");
+    }
+
+    public static void printSchoolType() {
+        for (String i : schoolType) {
+            System.out.println(i);
+        }
+    }
+
+    public static boolean checkSchoolExistence(String school) {
+        if (schoolType.contains(school))
+            return true;
+        return false;
+    }
     /* ----------- Get Methods ----------- */
 
     public String getCourseCode() {

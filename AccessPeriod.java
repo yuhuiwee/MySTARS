@@ -67,7 +67,7 @@ public class AccessPeriod implements Serializable {
         AccessPeriod st = stu.getAccessPeriod();
         ZonedDateTime current = ZonedDateTime.now();
 
-        if (current.getZone().toString() != "Asia/Singapore") {
+        if (current.getZone().toString() != "Asia/Singapore" | current.getZone().toString() != "+08:00") {
             current = current.withZoneSameInstant(ZoneId.of("Asia/Singapore"));
         }
 
@@ -84,7 +84,7 @@ public class AccessPeriod implements Serializable {
 
     }
 
-    // Constructor
+    // Constructor for student
     public AccessPeriod(String major, int year) {
         this.majoryear = String.join(",", major.toLowerCase(), String.valueOf(year));
     }
@@ -117,7 +117,7 @@ public class AccessPeriod implements Serializable {
      * AccessPeriod for major Change Default Access Period Remove All but Default
      */
 
-    public static void PrintALLaccess() {
+    public static void printAllAccess() {
         for (Map.Entry<String, ArrayList<ZonedDateTime>> entry : majoracc.entrySet()) {
             if (entry.getKey() != "Default") { // Print all but default
                 String majy = entry.getKey();

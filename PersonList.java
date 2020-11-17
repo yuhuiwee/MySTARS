@@ -23,21 +23,36 @@ public class PersonList {
         // Student(username, name, matric, gender, nationality)
 
         plist = new HashMap<String, Person>();
-        newStudent("TestStudent1", "Test Student 1", "U1234567890", 'M', "Singaporean", "Comp Sci", 1);
-        newStudent("TestStudent2", "Test Student 2", "U2345678901", 'F', "Singaporean", "Comp Sci", 2);
-        newStudent("TestStudent3", "Test Student 3", "U3456789012", 'M', "Singaporean", "Comp Sci", 3);
-        newStudent("TestStudent4", "Test Student 4", "U4567890123", 'F', "Singaporean", "Comp Sci", 4);
-        newStudent("TestStudent5", "Test Student 5", "U5678901234", 'M', "Singaporean", "Comp Sci", 1);
-        newStudent("TestStudent6", "Test Student 6", "U6789012345", 'F', "Singaporean", "Mathematics", 2);
-        newStudent("TestStudent7", "Test Student 7", "U7890123456", 'M', "Singaporean", "Mathematics", 3);
-        newStudent("TestStudent8", "Test Student 8", "U8901234567", 'F', "Singaporean", "Mathematics", 4);
-        newStudent("TestStudent9", "Test Student 9", "U9012345678", 'M', "Singaporean", "Mathematics", 1);
-        newStudent("TestStudent10", "Test Student 10", "U0123456789", 'F', "Malaysian", "Mathematics", 2);
-        newStudent("TestStudent11", "Test Student 11", "U0987654321", 'M', "Indian", "Philosophy", 3);
-        newStudent("TestStudent12", "Test Student 12", "U9876543210", 'F', "Chinese", "Philosophy", 4);
-        newStudent("TestStudent13", "Test Student 13", "U8765432109", 'M', "Thai", "NIE", 1);
-        newStudent("TestStudent14", "Test Student 14", "U7654321098", 'F', "Filipino", "NIE", 2);
-        newStudent("TestStudent15", "Test Student 15", "U6543210987", 'M', "Indonesian", "Business", 3);
+        newStudent("TestStudent1", "Test Student 1", "U1234567890", 'M', "Singaporean", "Comp Sci", 1,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent2", "Test Student 2", "U2345678901", 'F', "Singaporean", "Comp Sci", 2,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent3", "Test Student 3", "U3456789012", 'M', "Singaporean", "Comp Sci", 3,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent4", "Test Student 4", "U4567890123", 'F', "Singaporean", "Comp Sci", 4,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent5", "Test Student 5", "U5678901234", 'M', "Singaporean", "Comp Sci", 1,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent6", "Test Student 6", "U6789012345", 'F', "Singaporean", "Mathematics", 2,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent7", "Test Student 7", "U7890123456", 'M', "Singaporean", "Mathematics", 3,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent8", "Test Student 8", "U8901234567", 'F', "Singaporean", "Mathematics", 4,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent9", "Test Student 9", "U9012345678", 'M', "Singaporean", "Mathematics", 1,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent10", "Test Student 10", "U0123456789", 'F', "Malaysian", "Mathematics", 2,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent11", "Test Student 11", "U0987654321", 'M', "Indian", "Philosophy", 3,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent12", "Test Student 12", "U9876543210", 'F', "Chinese", "Philosophy", 4,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent13", "Test Student 13", "U8765432109", 'M', "Thai", "NIE", 1,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent14", "Test Student 14", "U7654321098", 'F', "Filipino", "NIE", 2,
+                "studentcz2002ss1@gmail.com");
+        newStudent("TestStudent15", "Test Student 15", "U6543210987", 'M', "Indonesian", "Business", 3,
+                "studentcz2002ss1@gmail.com");
 
         newAdmin("Admin1", "Admin 1", "G1234567890", 'M', "Singaporean", "Professor");
         newAdmin("Admin2", "Admin 2", "G2345678901", 'F', "Singaporean", "Associate Professor");
@@ -111,7 +126,7 @@ public class PersonList {
     }
 
     public static void newStudent(String username, String name, String matric, char gender, String nationality,
-            String major, int year) throws UserAlreadyExists {
+            String major, int year, String email) throws UserAlreadyExists {
         // Check is username and matric number is already taken!
         if (plist.containsKey(username) & plist != null) {
             throw new UserAlreadyExists("This Username is taken!");
@@ -124,19 +139,19 @@ public class PersonList {
         }
 
         Student s = new Student(username.toLowerCase(), name, matric, Character.toUpperCase(gender), nationality, major,
-                year);
+                year, email);
         plist.put(username.toLowerCase(), s);
         PersonList.savePersonMap(); // Save map immediately after creating new student
         return;
 
     }
 
-    public static void removeStudent(String username) throws UserNotFound, UserAlreadyExists {
+    public static void removeStudent(String username) throws UserNotFound, UserAlreadyExists, CourseDontExist {
         if (plist == null) {
             loadPersonList();
         }
 
-        Student s = getStudentByUsername(username);
+        Student s = (Student) getByUsername(username);
         s.dropAllCourse();
         PasswordHash.removeUser(username);
         plist.remove(username, s);

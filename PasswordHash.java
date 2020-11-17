@@ -27,10 +27,10 @@ public class PasswordHash {
         addUserPwd("Admin1", "Password123");
         addUserPwd("Admin2", "Password123");
 
-        savehashmap();
+        saveHashMap();
     }
 
-    private static void savehashmap() {
+    private static void saveHashMap() {
         try {
             FileOutputStream fos = new FileOutputStream("HashedPwd.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -47,7 +47,7 @@ public class PasswordHash {
     }
 
     @SuppressWarnings("unchecked")
-    private static void loadhashmap() throws UserAlreadyExists {
+    private static void loadHashMap() throws UserAlreadyExists {
         try {
             FileInputStream fis = new FileInputStream("HashedPwd.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -60,18 +60,18 @@ public class PasswordHash {
         } catch (IOException ioe) {
             // ioe.printStackTrace();
             new PasswordHash(); // If file not found, create default values
-            savehashmap();
+            saveHashMap();
         } catch (ClassNotFoundException c) {
             // System.out.println("Class not found");
             // c.printStackTrace();
             new PasswordHash();
-            savehashmap();
+            saveHashMap();
         }
     }
 
     public static boolean checkPwd(String username, String pwd) throws UserNotFound, UserAlreadyExists {
         if (userpassword == null) {
-            loadhashmap();
+            loadHashMap();
         }
 
         if (!userpassword.containsKey(username.toLowerCase())) {
@@ -87,31 +87,31 @@ public class PasswordHash {
         }
 
         userpassword.put(username.toLowerCase(), SCryptUtil.scrypt(pwd, 16, 16, 16));
-        savehashmap();
+        saveHashMap();
     }
 
     public static void removeUser(String username) throws UserAlreadyExists, UserNotFound {
         if (userpassword == null) {
-            loadhashmap();
+            loadHashMap();
         }
 
         if (!userpassword.containsKey(username.toLowerCase())) {
             throw new UserNotFound("User Account not found!");
         } else {
             userpassword.remove(username.toLowerCase());
-            savehashmap();
+            saveHashMap();
         }
     }
 
     public static void changePwd(String oldpwd, String newpwd, String username)
             throws UserNotFound, UserAlreadyExists, WrongPassword {
         if (userpassword == null) {
-            loadhashmap();
+            loadHashMap();
         }
         if (checkPwd(username, oldpwd)) {
             userpassword.remove(username);
             addUserPwd(username, newpwd);
-            savehashmap();
+            saveHashMap();
         } else {
             throw new WrongPassword("Wrong Password!");
         }

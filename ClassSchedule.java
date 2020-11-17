@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class ClassSchedule {
     private String classType;
     private String weekType;
@@ -5,6 +7,8 @@ public class ClassSchedule {
     private int startTime;
     private int endTime;
     private String venue;
+    private static HashMap<String, ArrayList<Integer>> venueLoc;
+    // Venue venue;
 
     public ClassSchedule(String classType, String weekType, String dayOfTheWeek, int startTime, int endTime,
             String venue) {
@@ -14,6 +18,14 @@ public class ClassSchedule {
         this.startTime = startTime;
         this.endTime = endTime;
         this.venue = venue;
+    }
+
+    public static void createVenueLoc() {
+        venueLoc = new HashMap<String, ArrayList<Integer>>();
+        venueLoc.put("LT1A", new ArrayList<Integer>());
+        venueLoc.put("LT2A", new ArrayList<Integer>());
+        venueLoc.put("TR1", new ArrayList<Integer>());
+        venueLoc.put("SWLAB", new ArrayList<Integer>());
     }
 
     // Normal Methods
@@ -66,11 +78,11 @@ public class ClassSchedule {
         this.endTime = endTime;
     }
 
-    public String getVenue() {
-        return venue;
+    public Venue getVenue() {
+        return location;
     }
 
-    public void setVenue(String venue) {
-        this.venue = venue;
+    public void setVenue(Venue location) {
+        this.location = location;
     }
 }

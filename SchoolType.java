@@ -1,0 +1,3 @@
+public enum SchoolType {
+    COMPSCIENCE, ENGINEERING, HOSPITALITY
+}
