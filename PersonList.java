@@ -54,8 +54,10 @@ public class PersonList {
         newStudent("TestStudent15", "Test Student 15", "U6543210987", 'M', "Indonesian", "Business", 3,
                 "studentcz2002ss1@gmail.com");
 
-        newAdmin("Admin1", "Admin 1", "G1234567890", 'M', "Singaporean", "Professor");
-        newAdmin("Admin2", "Admin 2", "G2345678901", 'F', "Singaporean", "Associate Professor");
+        newAdmin("Admin1", "Admin 1", "G1234567890", 'M', "Singaporean", "School of Computer Science and Engineering",
+                "Professor", "cz2002ss1@gmail.com");
+        newAdmin("Admin2", "Admin 2", "G2345678901", 'F', "Singaporean", "School of Physical and Mathematical Sciences",
+                "Associate Professor", "cz2002ss1@gmail.com");
 
         // write to ser file
         savePersonMap();
@@ -138,10 +140,11 @@ public class PersonList {
             }
         }
 
-        Student s = new Student(username.toLowerCase(), name, matric, Character.toUpperCase(gender), nationality, major,
-                year, email);
+        Student s = new Student(username.toLowerCase(), name.toLowerCase(), matric.toUpperCase(),
+                Character.toUpperCase(gender), nationality.toLowerCase(), major.toLowerCase(), year,
+                email.toLowerCase());
         plist.put(username.toLowerCase(), s);
-        PersonList.savePersonMap(); // Save map immediately after creating new student
+        savePersonMap(); // Save map immediately after creating new student
         return;
 
     }
@@ -151,14 +154,23 @@ public class PersonList {
             loadPersonList();
         }
 
-        Student s = (Student) getByUsername(username);
+        Student s = (Student) getByUsername(username.toLowerCase());
         s.dropAllCourse();
-        PasswordHash.removeUser(username);
-        plist.remove(username, s);
+        PasswordHash.removeUser(username.toLowerCase());
+        plist.remove(username.toLowerCase(), s);
+        s = null;
+        savePersonMap();
     }
 
-    public static void newAdmin(String username, String name, String id, char gender, String nationality,
-            String position) throws UserAlreadyExists {
+    public static void editStudentDetails(String user, String name, String matric, char gender, String nationality,
+            String major, int year, String email) {
+        Student s = (Student) plist.get(user);
+        s.editStudentDetails(user, name, matric, gender, nationality, major, year, email);
+        savePersonMap();
+    }
+
+    public static void newAdmin(String username, String name, String id, char gender, String nationality, String school,
+            String position, String email) throws UserAlreadyExists {
         if (plist == null) {
             PersonList.loadPersonList();
         }
@@ -174,7 +186,9 @@ public class PersonList {
             }
         }
 
-        Admin ad = new Admin(username.toLowerCase(), name, id, Character.toUpperCase(gender), nationality, position);
+        Admin ad = new Admin(username.toLowerCase(), name.toLowerCase(), id.toUpperCase(),
+                Character.toUpperCase(gender), nationality.toLowerCase(), school.toLowerCase(), position.toLowerCase(),
+                email.toLowerCase());
         plist.put(username.toLowerCase(), ad);
         PersonList.savePersonMap();
     }
@@ -193,6 +207,7 @@ public class PersonList {
         } else {
             throw new UserNotFound("Admin not found");
         }
+        savePersonMap();
     }
 
     public static HashMap<String, Admin> getAdminMap() throws UserAlreadyExists {
@@ -210,12 +225,13 @@ public class PersonList {
     }
 
     public static void editAdmin(String username, String name, String id, char gender, String nationality,
-            String position) throws UserNotFound, UserAlreadyExists {
+            String school, String position, String email) throws UserNotFound, UserAlreadyExists {
         if (plist == null) {
             PersonList.loadPersonList();
         }
         PersonList.removeAdmin(username);
-        PersonList.newAdmin(username, name, id, gender, nationality, position);
+        PersonList.newAdmin(username, name, id, gender, nationality, school, position, email);
+        savePersonMap();
     }
 
     public static boolean checkusername(String username) throws UserAlreadyExists {

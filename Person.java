@@ -4,6 +4,8 @@ public abstract class Person {
      protected String matricnum;
      protected char gender;
      protected String nationality;
+     protected String school;
+     protected String email;
 
      public String getUsername() {
           return username;
@@ -23,5 +25,13 @@ public abstract class Person {
 
      public String getNationality() {
           return nationality;
+     }
+
+     public String getSchool() {
+          return school;
+     }
+
+     public String getEmail() {
+          return email;
      }
 }

@@ -5,25 +5,32 @@ public class CourseList {
 
 	private static HashMap<String, Course> mapCourse = null;
 	private static HashMap<Integer, IndexNum> indexList = null;
-	// venueTimetable hashmap is used to keep track of the vacancy of each venue. So
-	// each venue has its own
-	// timetable. Eg. LT2A has a hashmap containing dayOfTheWeek from 1-10 which
-	// represents (1= Odd Week Monday,
-	// 10 = Even week Friday). Then in each dayOfTheWeek, we have an arraylist to
-	// store the timeslots every
-	// time the venue is booked for a class. So for example a lecture is held at
-	// LT2A on every monday from
-	// 1000 - 1200. So in the hashmap for LT2A key, we have both 1 and 6
-	// dayOfTheWeek key containing
-	// 10,11,12 in its respective arraylist. So if another mod tries to book at this
-	// timeslot on those
-	// dayOfTheWeek mentioned, we will not allow it.
+	private static ArrayList<String> schoolType;
+	private static HashMap<String, ArrayList<Integer>> venueLoc;
+	// venueLoc hashmap is used to keep track of the vacancy of each venue. So
+	// each venue has its own timetable. The timeslot will be represented as serial
+	// number of integer type as
+	// [DAYOFWEEK|TIMEPERIOD|WEEKTYPE]. So for example if LT2A saves a serial number
+	// of 110001,
+	// what this means is that LT2A will be occupied on a Monday (Monday=1 .. Friday
+	// = 5), from 1000 to 1030
+	// (time represented in 24 hour format) on every week(1=normal, 2 = Odd, 3 =
+	// Even week)
+	// So if during a course creation and the class venue selected clashes with the
+	// values in venueLoc,
+	// they will mention that that timeslot is occupied.
 
+	// ****** JUST AN INITIALIZATION WHEN PROGRAM STARTS ******
 	public CourseList() {
 		mapCourse = new HashMap<String, Course>();
 
-		Course c1 = new Course("CZ2001", "Comp Sci");
-		Course c2 = new Course("CZ2002", "Comp Sci");
+		schoolType = new ArrayList<String>();
+		schoolType.add("Computer Science");
+		schoolType.add("Engineering");
+		schoolType.add("Philosophy");
+
+		Course c1 = new Course("CZ2001", "Computer Science");
+		Course c2 = new Course("CZ2002", "Engineering");
 		Course c3 = new Course("PH2018", "Philosophy");
 
 		mapCourse.put("CZ2001", c1);
@@ -39,6 +46,12 @@ public class CourseList {
 		IndexNum i5 = new IndexNum(1028, 10);
 		IndexNum i6 = new IndexNum(1029, 10);
 
+		venueLoc = new HashMap<String, ArrayList<Integer>>();
+		venueLoc.put("LT1A", new ArrayList<Integer>());
+		venueLoc.put("LT2A", new ArrayList<Integer>());
+		venueLoc.put("TR1", new ArrayList<Integer>());
+		venueLoc.put("SWLAB", new ArrayList<Integer>());
+
 		ClassSchedule sc1 = new ClassSchedule("Lecture", "Normal", "Monday", 1000, 1200, "LT2A");
 		ClassSchedule sc2 = new ClassSchedule("Tutorial", "Normal", "Tuesday", 1000, 1200, "TR1");
 		ClassSchedule sc3 = new ClassSchedule("Tutorial", "Normal", "Monday", 1300, 1400, "TR1");
@@ -46,6 +59,40 @@ public class CourseList {
 		ClassSchedule sc5 = new ClassSchedule("Lecture", "Normal", "Wednesday", 1100, 1300, "LT1A");
 		ClassSchedule sc6 = new ClassSchedule("Laboratory Session", "Odd", "Tuesday", 1000, 1200, "SWLAB");
 		ClassSchedule sc7 = new ClassSchedule("Laboratory Session", "Even", "Tuesday", 1000, 1200, "SWLAB");
+
+		venueLoc.get("LT2A").add(110001);
+		venueLoc.get("LT2A").add(110301);
+		venueLoc.get("LT2A").add(111001);
+		venueLoc.get("LT2A").add(111301); // The serial number added in half an hour interval (1000 - 1200) for LT2A
+											// Note that serial number 112001 is not added here as that would mean the
+											// class ends at 1230
+		venueLoc.get("TR1").add(210001);
+		venueLoc.get("TR1").add(210301);
+		venueLoc.get("TR1").add(211001);
+		venueLoc.get("TR1").add(211301); // sc2
+
+		venueLoc.get("TR1").add(113001);
+		venueLoc.get("TR1").add(113301); // sc3
+
+		venueLoc.get("LT2A").add(311001);
+		venueLoc.get("LT2A").add(311301);
+		venueLoc.get("LT2A").add(312001);
+		venueLoc.get("LT2A").add(312301); // sc4
+
+		venueLoc.get("LT1A").add(311001);
+		venueLoc.get("LT1A").add(311301);
+		venueLoc.get("LT1A").add(312001);
+		venueLoc.get("LT1A").add(312301); // sc5
+
+		venueLoc.get("SWLAB").add(210002);
+		venueLoc.get("SWLAB").add(210302);
+		venueLoc.get("SWLAB").add(211002);
+		venueLoc.get("SWLAB").add(211302); // sc6
+
+		venueLoc.get("SWLAB").add(210003);
+		venueLoc.get("SWLAB").add(210303);
+		venueLoc.get("SWLAB").add(211003);
+		venueLoc.get("SWLAB").add(211303); // sc7
 
 		indexList.put(1024, i1);
 		indexList.put(1025, i2);
@@ -144,30 +191,41 @@ public class CourseList {
 		}
 	}
 
-	// ****** Method to check venue vacancy during course creation ******
-	public static boolean checkVenueVacancy(int weekType, int dayOfTheWeek, int startTime, int endTime, String venue) {
-		int day1, day2;
-
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
+	// ****** PRINT SCHOOL TYPE ******
+	public static void printSchoolType() {
+		for (String i : schoolType) {
+			System.out.println(i);
 		}
+	}
 
-		if (weekType == 1) // Normal week type (Incld: odd and week)
-		{
-			day1 = dayOfTheWeek;
-			day2 = dayOfTheWeek + 5;
-			if ((venueTimeTable.get(Venue.valueOf(venue)).get(day2).contains(startTime))
-					|| (venueTimeTable.get(Venue.valueOf(venue)).get(day2).contains(endTime)))
-				return false; // Clash for the even week
-		} else if (weekType == 2)
-			day1 = dayOfTheWeek; // Odd week mapping
-		else
-			day1 = dayOfTheWeek + 5; // Even week mapping
-		venueTimeTable.get(Venue.LT2A).put(3, new ArrayList<Integer>(Arrays.asList(11, 12, 13)));
-		if ((venueTimeTable.get(Venue.valueOf(venue)).get(day1).contains(startTime))
-				|| (venueTimeTable.get(Venue.valueOf(venue)).get(day1).contains(endTime)))
-			return false; // This means that there is a clash, no vacancy
-		return true;
+	// ****** Method to check venue vacancy during course creation ******
+	public static String setVenueVacancy(Scanner sc, int totalHalfInterval, ArrayList<Integer> timeslots) {
+		String venue;
+		boolean clash;
+		while (true) {
+			clash = false;
+			System.out.print("Set the venue: ");
+			venue = sc.nextLine();
+			if (!(venueLoc.containsKey(venue))) {
+				System.out.println("\nThis venue does not exist! Please enter a valid venue!");
+				continue;
+			}
+			for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
+				if (venueLoc.get(venue).contains(timeslots.get(i))) {
+					clash = true;
+					System.out.println(
+							venue + " is occupied at " + timeslots.get(i) + ". Please enter a different venue.");
+					break;
+				}
+			}
+			if (clash)
+				continue;
+			for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
+				venueLoc.get(venue).add(timeslots.get(i));
+			}
+			break;
+		}
+		return venue;
 	}
 
 	// ****** Method to print student by index ******
@@ -191,20 +249,20 @@ public class CourseList {
 			loadCourseList();
 		}
 		System.out.println("\nStudent list of Course " + courseCode + ":\n");
-		int[] temp = mapCourse.get(courseCode).getIndexNumber();
-		ArrayList<String> temp2 = new ArrayList<>();
-		ArrayList<String> students = new ArrayList<>();
-		for (int i = 0; i < temp.length; i++) {
-			temp2 = indexList.get(temp[i]).getRegisteredStudentList();
-			for (int j = 0; j < temp2.size(); j++) {
-				students.add(temp2.get(j));
+		int[] listOfIndexNum = mapCourse.get(courseCode).getIndexNumber();
+		ArrayList<String> listOfStudentsByIndex = new ArrayList<>();
+		ArrayList<String> listOfStudentsByCourse = new ArrayList<>();
+		for (int i = 0; i < listOfIndexNum.length; i++) {
+			listOfStudentsByIndex = indexList.get(listOfIndexNum[i]).getRegisteredStudentList();
+			for (int j = 0; j < listOfStudentsByIndex.size(); j++) {
+				listOfStudentsByCourse.add(listOfStudentsByIndex.get(j));
 			}
-			temp2.clear();
+			listOfStudentsByIndex.clear();
 		}
-		for (int k = 0; k < students.size(); k++) {
-			System.out.println((k + 1) + ") " + students.get(k));
+		for (int k = 0; k < listOfStudentsByCourse.size(); k++) {
+			System.out.println((k + 1) + ") " + listOfStudentsByCourse.get(k));
 		}
-		if (students.size() == 0) {
+		if (listOfStudentsByCourse.size() == 0) {
 			System.out.println("<Empty>\n");
 		}
 	}
@@ -316,7 +374,7 @@ public class CourseList {
 			System.out.println("\nThe Course code already exist! Please enter a new Course code!");
 			return false;
 		}
-		if (!(Course.checkSchoolExistence(school))) {
+		if (!(schoolType.contains(school))) {
 			System.out.println("\nThe school entered does not exist! Please enter a valid school!");
 			return false;
 		}
@@ -327,35 +385,37 @@ public class CourseList {
 	}
 
 	// ****** Method to Create a new Index Number for a Course ******
-	public static boolean newIndexNumber(String courseCode, int indexNumber, int vacancy) {
+	public static int newIndexNumber(Scanner sc, String courseCode) {
+		int indexNumber, vacancy;
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-		if (indexList.containsKey(indexNumber)) {
-			System.out.println("\nThis index number already exist!\nPlease enter a different index number!");
-			return false;
+		while (true) {
+			System.out.print("\nEnter the new indexNumber: ");
+			indexNumber = sc.nextInt();
+			System.out.print("Enter the vacancy: ");
+			vacancy = sc.nextInt();
+			if (indexList.containsKey(indexNumber)) {
+				System.out.println("\nThis index number already exist!\nPlease enter a different index number!");
+			} else
+				break;
 		}
-		// TODO: Check whether the day, timeSlot and venue clashes with other
-		// indexNumber by a timetable class
-		// DONE: This is done separately where the application class calls a method from
-		// Courselist
-		// to validate user input and return the necessary feedback
 		IndexNum i = new IndexNum(indexNumber, vacancy);
 		indexList.put(indexNumber, i);
 		mapCourse.get(courseCode).setIndexNumber(indexNumber, indexList.get(indexNumber));
-		CourseList.saveCourseMap();
-		return true;
+		return indexNumber;
 	}
 
 	// ****** Method to Create a new schedule for an indexnumber ******
 	public static void newSchedule(int indexNumber, String classType, String weekType, String dayOfTheWeek,
-			int startTime, int endTime, String venue) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
+			int startTime, int endTime, String venue, int totalHalfInterval, ArrayList<Integer> timeslots) {
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
+			temp.add(timeslots.get(i));
 		}
-
-		ClassSchedule sc = new ClassSchedule(classType, weekType, dayOfTheWeek, startTime, endTime, venue);
-		indexList.get(indexNumber).addSchedule(sc);
+		Collections.sort(temp); // Sort the timeslots of this new schedule
+		ClassSchedule sch = new ClassSchedule(classType, weekType, dayOfTheWeek, startTime, endTime, venue, temp);
+		indexList.get(indexNumber).addClassSchedule(startTime, sch);
 		// CourseList.saveCourseMap();
 	}
 
@@ -373,6 +433,7 @@ public class CourseList {
 	// IRS: Since the requirement didn't include remove course, should we not
 	// include it?
 
+	// ****** Method to Change the Course Code name (Admin) ******
 	public static void updateCourseCode(Scanner sc, String currentCourseCode) {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
@@ -392,50 +453,69 @@ public class CourseList {
 		mapCourse.put(newCourseCode, c);
 	}
 
-	public static void updateCourseCodeSchool(Scanner sc, String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		System.out.println("Enter new School for Course code (" + courseCode + "): ");
-		String newCouseCodeSchool = sc.next();
-		String currentSchType = mapCourse.get(courseCode).getSchool();
-		mapCourse.get(courseCode).setSchool(newCourseCodeSchool);
-		mapCourse.remove(currentSchType);
-		// nid compare whether curr n new is samw
-		// nid compare whether input valid or not
-	}
-
-	// ****** Method to Change the Index Number digits of a Course ******
-	public static boolean updateIndexNumber(String courseCode, int indexNumber, int newindexNumber) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		if (!(indexList.containsKey(indexNumber))) {
-			System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
-			return false;
-		}
-		int vacancy = mapCourse.get(courseCode).getIndexVacancy(indexNumber);
-		IndexNum i = new IndexNum(newindexNumber, vacancy);
-		indexList.put(newindexNumber, i);
-		mapCourse.get(courseCode).setIndexNumber(newindexNumber, indexList.get(newindexNumber));
-		mapCourse.remove(indexNumber, indexList.get(indexNumber));
-		CourseList.saveCourseMap();
-		return true;
-	}
-
-	public static void updateIndexNumVacancy(String courseCode, int indexNumber, int newVacancy) {
+	// ****** Method to Change the Course Code Schoo Type (Admin) ******
+	public static void updateCourseSchool(Scanner sc, String courseCode) {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
 		while (true) {
-			if (!(indexList.containsKey(indexNumber))) {
-				System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
+			String currentSchType = mapCourse.get(courseCode).getSchool();
+			System.out.println("Enter a new School for Course code (" + courseCode + "): ");
+			String newSchool = sc.nextLine();
+			if (!(schoolType.contains(newSchool))) {
+				System.out.println("\nPlease enter a valid school!");
+				continue;
+			}
+			if (newSchool.equals(currentSchType)) {
+				System.out
+						.println("You have entered the same school for this course code!\nPlease re-enter the school!");
+				continue;
+			}
+			mapCourse.get(courseCode).setSchool(newSchool);
+			break;
+		}
+	}
 
+	// ****** Method to Change the Index Number digits of a Course (Admin) ******
+	public static void updateIndexNumber(Scanner sc, String courseCode) {
+		if (indexList == null | mapCourse == null) {
+			loadCourseList();
+		}
+		int currentIndexNumber;
+		int updatedIndexNumber;
+		while (true) {
+			System.out.println("Enter Index Number to change: ");
+			currentIndexNumber = sc.nextInt();
+			if (!(indexList.containsKey(currentIndexNumber))) {
+				System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
 			} else
 				break;
 		}
-		indexList.get(indexNumber).setVacancy(newVacancy);
+		System.out.println("\nEnter updated Index Number: ");
+		updatedIndexNumber = sc.nextInt();
+		int vacancy = mapCourse.get(courseCode).getIndexVacancy(currentIndexNumber);
+		IndexNum i = new IndexNum(updatedIndexNumber, vacancy);
+		indexList.put(updatedIndexNumber, i);
+		mapCourse.get(courseCode).setIndexNumber(updatedIndexNumber, indexList.get(updatedIndexNumber));
+		mapCourse.remove(currentIndexNumber, indexList.get(currentIndexNumber));
+	}
 
+	public static void updateIndexNumVacancy(Scanner sc, String courseCode) {
+		if (indexList == null | mapCourse == null) {
+			loadCourseList();
+		}
+		int indexNum;
+		while (true) {
+			System.out.println("Enter Index Number: ");
+			indexNum = sc.nextInt();
+			if (!(indexList.containsKey(indexNum))) {
+				System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
+			} else
+				break;
+		}
+		System.out.println("Enter new Vacancy: ");
+		int updateVacancy = sc.nextInt();
+		indexList.get(indexNum).setVacancy(updateVacancy);
 	}
 
 	// TODO: Refer to updateCourse Method in application class. We will have
@@ -560,6 +640,14 @@ public class CourseList {
 		else {
 			return false;
 		}
+	}
+
+	public static IndexNum getIndexNum(int index) {
+		return indexList.get(index);
+	}
+
+	public static Course getCourse(String course) {
+		return mapCourse.get(course);
 	}
 
 	// Swopcourse(String student1, String student2, int index1, int index 2, String

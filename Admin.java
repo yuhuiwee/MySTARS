@@ -7,23 +7,16 @@ public class Admin extends Person implements Serializable {
     private static final long serialVersionUID = 1L;
     private String position;
 
-    public Admin(String username, String name, String id, char gender, String nationality, String position) {
+    public Admin(String username, String name, String id, char gender, String nationality, String school,
+            String position, String email) {
         this.username = username;
         this.name = name;
         this.matricnum = id;
         this.gender = gender;
         this.nationality = nationality;
+        this.school = school;
         this.position = position;
-    }
-
-    public void addStudent(String username, String name, String matric, char gender, String nationality, String major,
-            int year) throws UserAlreadyExists {
-        PersonList.newStudent(username, name, matric, gender, nationality, major, year);
-        return;
-    }
-
-    public void removeStudent(String username) throws UserNotFound, UserAlreadyExists, CourseDontExist {
-        PersonList.removeStudent(username);
+        this.email = email;
     }
 
     // When creating a new course, the admin will have to then create a new

@@ -108,40 +108,25 @@ public class Swop {
         return false;
     }
 
-    public static boolean dropSwop(String student1, String student2, int index1) {
-        String k;
-        if (student1.compareTo(student2) > 0) {
-            k = student1 + ":" + student2;
-        } else {
-            k = student2 + ":" + student1;
-        }
+    public static boolean dropSwop(String student1, int index1) {
 
-        if (groups.containsKey(k)) {
-            boolean nobreak = true;
-            courseSwoplist = groups.get(k);
-            ListIterator<SwopGroup> i = courseSwoplist.listIterator();
-            while (i.hasNext()) {
-                // Only student that initiated the swop can drop the swop
-                SwopGroup temp = i.next();
-                if (temp.getIndex1() == index1) {
-                    courseSwoplist.remove(temp);
-                    temp = null; // remove object from memory
-                    nobreak = false;
-                    return true;
+        for (Map.Entry<String, ArrayList<SwopGroup>> entry : groups.entrySet()) {
+            if (entry.getKey().contains(student1)) {
+                courseSwoplist = entry.getValue();
+                ListIterator<SwopGroup> i = courseSwoplist.listIterator();
+                while (i.hasNext()) {
+                    // Only student that initiated the swop can drop the swop
+                    SwopGroup temp = i.next();
+                    if (temp.getIndex1() == index1) {
+                        courseSwoplist.remove(temp);
+                        groups.replace(entry.getKey(), courseSwoplist);
+                        saveSwopList();
+                        return true;
+                    }
                 }
             }
-
-            if (nobreak) {
-                System.out.println("Swop not found!");
-                return false;
-            }
         }
-
-        else {
-            System.out.println("Swop not found!");
-            return false;
-        }
-        return true;
+        return false;
     }
 
 }
@@ -176,4 +161,4 @@ class SwopGroup {
         return student2;
     }
 
-}
+}e

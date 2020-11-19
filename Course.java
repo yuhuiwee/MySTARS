@@ -7,10 +7,11 @@ public class Course implements Serializable {
      *
      */
 
-    private static ArrayList<String> schoolType;
+    // private static ArrayList<String> schoolType;
     private static final long serialVersionUID = 1L;
     private String courseCode;
     private String school;
+    private int au;
     // private String userName;
     private HashMap<Integer, IndexNum> mapIndex; // The Integer in this case is the name of the IndexNum. So for
                                                  // example if i want to find for index 1024, i can simply use
@@ -22,24 +23,17 @@ public class Course implements Serializable {
         mapIndex = new HashMap<Integer, IndexNum>();
     }
 
-    public static void createSchoolType() {
-        schoolType = new ArrayList<String>();
-        schoolType.add("Computer Science");
-        schoolType.add("Engineering");
-        schoolType.add("Philodophy");
-    }
-
-    public static void printSchoolType() {
-        for (String i : schoolType) {
-            System.out.println(i);
-        }
-    }
-
-    public static boolean checkSchoolExistence(String school) {
-        if (schoolType.contains(school))
-            return true;
-        return false;
-    }
+    /*
+     * public static void createSchoolType() { schoolType = new ArrayList<String>();
+     * schoolType.add("Computer Science"); schoolType.add("Engineering");
+     * schoolType.add("Philodophy"); }
+     * 
+     * public static void printSchoolType() { for (String i : schoolType) {
+     * System.out.println(i); } }
+     * 
+     * public static boolean checkSchoolExistence(String school) { if
+     * (schoolType.contains(school)) return true; return false; }
+     */
     /* ----------- Get Methods ----------- */
 
     public String getCourseCode() {
@@ -60,7 +54,14 @@ public class Course implements Serializable {
         return k;
     }
 
+    public int getAU() {
+        return au;
+    }
+
     /* ----------- Set Methods ----------- */
+    public void setAU(int newau) {
+        this.au = newau;
+    }
 
     public void setcourseCode(String courseCode) {
         this.courseCode = courseCode;

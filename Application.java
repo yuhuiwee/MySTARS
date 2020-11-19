@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter;
 
 public class Application {
 
-    public static void main(String[] args) throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist {
+    public static void main(String[] args) throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist,
+            AccessPeriodNotFound, CourseAlreadyExist, TimetableClash {
 
         Scanner sc = new Scanner(System.in);
         Console con = System.console();
@@ -36,10 +37,11 @@ public class Application {
     }
 
     private static void StudentApp(Scanner sc, Student st, String username, Console con)
-            throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist {
+            throws UserNotFound, UserAlreadyExists, WrongPassword, CourseDontExist, TimetableClash {
         String coursecode;
         int indexnum;
         int index2;
+        int elec;
 
         System.out.println("Welcome to MySTARS!");
         if (st.getSwopStatus()) { // Notify student if swop is successful
@@ -60,8 +62,15 @@ public class Application {
                     coursecode = sc.next();
                     System.out.print("Enter Index number: ");
                     indexnum = sc.nextInt();
+                    System.out.println("Enter elective type:\n1. CORE\n2. Major PE\n3.GER-PE\n4. GER-UE\n5. UE");
+                    elec = sc.nextInt();
+                    Course c = CourseList.getCourse(coursecode);
+                    if (c.getAU() + st.getAU() > 21) { // check if au exceeded
+                        System.out.println("Maxinum AUs exceeded!");
+                        break;
+                    }
                     if (CourseList.checkCourseExistence(coursecode) & CourseList.checkIndex(coursecode, indexnum)) {
-                        st.addCourse(coursecode, indexnum);
+                        st.addCourse(coursecode, indexnum, elec);
                         break;
                     } else {
                         System.out.println("Error! Please enter a valid Course code / Index number");
@@ -90,13 +99,21 @@ public class Application {
                 case 5: // Change course index number
                     System.out.print("Enter course code: ");
                     coursecode = sc.next();
-                    System.out.print("Enter current Index Number: ");
-                    indexnum = sc.nextInt();
+                    int index = st.verifyCourse(coursecode);
+                    if (index == -1) {
+                        throw new CourseDontExist("You are not Registered for this course!");
+                    }
                     System.out.print("Enter new Index Number: ");
                     index2 = sc.nextInt();
-                    if (CourseList.checkVacancies(indexnum) > 0) {
-                        st.dropCourse(coursecode, indexnum);
-                        st.addCourse(coursecode, index2);
+                    if (!st.swapIndexCheck(index, index2)) {
+                        System.out.println("Error! There is a time clash! You are not able to swop to this index!");
+                        break;
+                    }
+                    if (CourseList.checkVacancies(index) > 0) {
+
+                        elec = st.getCourseElectiveIndex(coursecode);
+                        st.dropCourse(coursecode, index);
+                        st.addCourse(coursecode, index2, elec);
                         break;
                     } else {
                         System.out.println("Course index full! Please try again!");
@@ -115,6 +132,11 @@ public class Application {
                     }
                     System.out.println("Enter the Index Number that you want to swop to: ");
                     index2 = sc.nextInt();
+                    if (!st.swapIndexCheck(indexnum, index2)) {
+                        System.out.println(
+                                "Error! There is a time clash with the new index! Please try again with another person/index");
+                        break;
+                    }
 
                     Swop.swopStudent(coursecode, indexnum, index2, username, newuser);
                     break;
@@ -128,8 +150,14 @@ public class Application {
                     } else {
                         throw new WrongPassword("Password do not match!");
                     }
-
-                case 8: // Quit
+                case 8:// change elective type for course
+                    System.out.println("Enter the course code to change: ");
+                    coursecode = sc.nextLine();
+                    System.out.println(
+                            "Enter elective type to change to:\n1. CORE\n2. Major PE\n3.GER-PE\n4. GER-UE\n5. UE");
+                    elec = sc.nextInt();
+                    st.swapElectiveType(coursecode, elec);
+                case 9: // Quit
                     System.out.println("Thank you for using MySTARS!\nQuitting...");
                     break;
                 default:
@@ -139,13 +167,15 @@ public class Application {
         }
     }
 
-    private static void AdminApp(Scanner sc, Admin ad, String username, Console con) throws UserAlreadyExists {
+    private static void AdminApp(Scanner sc, Admin ad, String username, Console con)
+            throws UserAlreadyExists, AccessPeriodNotFound, UserNotFound, CourseDontExist, CourseAlreadyExist {
         String s_name;
         String matric;
         char gender;
         String nationality;
         String major;
         Integer year;
+        String email;
         int sel = 0;
         ZonedDateTime start;
         ZonedDateTime end;
@@ -156,7 +186,7 @@ public class Application {
             System.out.print("(1) Edit/Check Student Access Period\n" + "(2) Add Student\n" + "(3) Add new course\n"
                     + "(4) Update an existing course" + "\n" + "(5) Check Available slot for an index number\n"
                     + "(6) Print student list by index number\n" + "(7) Print registered student list by course\n"
-                    + "(8) Quit\n");
+                    + "(8) Remove Student\n(9)Edit Student Details\n(10)Edit Profile Details\n(11)Quit\n");
             sel = sc.nextInt();
             switch (sel) {
                 case 1:
@@ -258,22 +288,33 @@ public class Application {
 
                     }
                 case 2: // add a student
-                    System.out.print("Enter student's username: \n");
-                    username = sc.next();
-                    System.out.print("Enter student's name: \n");
-                    s_name = sc.next();
-                    System.out.print("Enter student's matric number: \n");
-                    matric = sc.next();
-                    System.out.print("Enter student's gender: \n");
+                    System.out.print("Enter student's username: ");
+                    username = sc.nextLine();
+                    System.out.print("Enter student's name: ");
+                    s_name = sc.nextLine();
+                    System.out.print("Enter student's matric number: ");
+                    matric = sc.nextLine();
+                    System.out.print("\nEnter student's gender(M/F): ");
                     gender = sc.next().charAt(0);
-                    System.out.print("Enter student's nationality: \n");
+                    while (Character.toLowerCase(gender) != 'f' | Character.toLowerCase(gender) != 'm') {
+                        System.out.println("\nError! Please re-enter gender: ");
+                        gender = sc.next().charAt(0);
+                    }
+                    System.out.print("\nEnter student's nationality: ");
                     nationality = sc.next();
-                    System.out.print("Enter student's major: \n");
-                    major = sc.next();
-                    System.out.print("Enter student's year: \n");
+                    System.out.print("\nEnter student's major: ");
+                    major = sc.nextLine();
+                    System.out.print("\nEnter student's year: ");
                     year = sc.nextInt();
-                    ad.addStudent(username.toLowerCase(), s_name, matric, Character.toUpperCase(gender), nationality,
-                            major, year);
+                    System.out.print("\nEnter student's email: ");
+                    email = sc.nextLine();
+                    while (!email.contains("@")) {
+                        System.out.println("Invalid email address!");
+                        System.out.print("\nPlease re-enter email: ");
+                        email = sc.nextLine();
+                    }
+                    PersonList.newStudent(username.toLowerCase(), s_name, matric, Character.toUpperCase(gender),
+                            nationality, major, year, email);
                     break;
 
                 case 3:
@@ -281,7 +322,7 @@ public class Application {
                     break;
 
                 case 4:
-                    UpdateCourse(sc); // TODO: Create the logic for UpdateCourse info
+                    updateCourse(sc); // TODO: Create the logic for UpdateCourse info
                     break;
                 case 5:
                     CourseList.printAllIndex();
@@ -289,32 +330,118 @@ public class Application {
                     int vacancy = CourseList.checkVacancies(indexNum);
                     System.out.println("\nThe vacancy for index " + indexNum + " is: " + vacancy);
                     break;
-                case 6: {
+                case 6:
                     CourseList.printAllIndex();
                     int indexNum2 = checkIndexNumExistence(sc);
                     CourseList.printStudentByIndex(indexNum2);
                     break;
-                    /*
-                     * int index = sc.nextInt();
-                     * System.out.print("Enter index number of course: \n"); ad.printByIndex(index);
-                     * break;
-                     */
-                }
-                case 7: {
+                /*
+                 * int index = sc.nextInt();
+                 * System.out.print("Enter index number of course: \n"); ad.printByIndex(index);
+                 * break;
+                 */
+
+                case 7:
                     CourseList.printAllCourse();
                     String courseCode = checkCourseExistence(sc);
                     CourseList.printStudentByCourse(courseCode);
                     break;
-                    /*
-                     * String coursecode = sc.nextLine(); System.out.print("Enter course name: \n");
-                     * ad.printByCourse(coursecode); break;
-                     */
-                }
+                /*
+                 * String coursecode = sc.nextLine(); System.out.print("Enter course name: \n");
+                 * ad.printByCourse(coursecode); break;
+                 */
+                case 8:// remove student
+                    System.out.println("Username of Student to be removed: ");
+                    username = sc.nextLine();
+                    PersonList.removeStudent(username);
+                    break;
+
+                case 9: // edit student details
+                    System.out.print("Enter username of student to edit: ");
+                    username = sc.nextLine();
+                    while (!PersonList.checkusername(username)
+                            && !(PersonList.getByUsername(username) instanceof Student)) {
+                        System.out.println("Error! This username does not exist!");
+                        System.out.print("Please re-enter student username: ");
+                        username = sc.nextLine();
+                    }
+                    Student s = (Student) PersonList.getByUsername(username);
+                    s_name = s.getName();
+                    matric = s.getMatric();
+                    gender = s.getGender();
+                    nationality = s.getNationality();
+                    major = s.getSchool();
+                    year = s.getYear();
+                    email = s.getEmail();
+                    int editchoice;
+                    do {
+                        System.out.println("Choose which details to edit. Enter 8 to submit!");
+                        System.out.println(
+                                "(1) Name\n(2) Matric\n(3) Gender\n(4) Nationality\n(5) Major\n(6) Year\n(7) Email (8) Submit");
+
+                        editchoice = sc.nextInt();
+
+                        switch (editchoice) {
+                            case 1: // name
+                                System.out.println("Current name: " + s_name);
+                                System.out.print("\nNew Name: ");
+                                s_name = sc.nextLine();
+                                break;
+                            case 2:// matric
+                                System.out.println("Current matric: " + matric);
+                                System.out.print("\nNew Matrix: ");
+                                matric = sc.nextLine();
+                                break;
+                            case 3: // gender
+                                System.out.println("Current gender: " + Character.toString(gender));
+                                System.out.print("\nNew Gender: ");
+                                gender = sc.next().charAt(0);
+                                while (Character.toLowerCase(gender) != 'f' | Character.toLowerCase(gender) != 'm') {
+                                    System.out.println("Error! Please re-enter gender: ");
+                                    gender = sc.next().charAt(0);
+                                }
+                                break;
+                            case 4: // nationality
+                                System.out.println("Current nationality: " + nationality);
+                                System.out.print("\nNew Nationality: ");
+                                nationality = sc.nextLine();
+                                break;
+                            case 5: // major
+                                System.out.println("Current major: " + major);
+                                System.out.print("\nNew major: ");
+                                major = sc.nextLine();
+                                break;
+                            case 6: // year
+                                System.out.println("Current year: " + String.valueOf(year));
+                                System.out.print("\nUpdated Year: ");
+                                year = sc.nextInt();
+                                break;
+                            case 7: // email
+                                System.out.println("Current email: " + email);
+                                System.out.print("\nNew email: ");
+                                email = sc.nextLine();
+                                while (!email.contains("@")) {
+                                    System.out.println("Error! Please enter a valid email: ");
+                                    email = sc.nextLine();
+                                }
+                                break;
+                            case 8:// submit
+                                System.out.println("Editing Student Details...");
+                                PersonList.editStudentDetails(username, s_name, matric, gender, nationality, major,
+                                        year, email);
+                                break;
+                        }
+                    } while (editchoice > 0 & editchoice < 8);
+
+                    break;
+
+                case 10:// edit own details
+                    break;
 
             }
         }
 
-        while (sel != 8);
+        while (sel != 11);
     }
 
     // =============================================== ALOT OF METHODS HERE YO
@@ -432,11 +559,12 @@ public class Application {
 
     }
 
-    // ****** Method to add new course ******
-    private static void newCourse(Scanner sc) {
-        String venue, courseCode, school, startStr, endStr;
+    // ****** CREATE NEW COURSE ******
+    private static void newCourse(Scanner sc) throws CourseAlreadyExist {
+        String venue, courseCode, school;
         int indexNum, vacancy, classNum, startTime, endTime, totalIndex, m;
         int classType = -1, weekType = -1, dayOfTheWeek = -1;
+        int totalHalfInterval, temp1, temp2, temp3, temp4;
         String[] indexDetails;
         ArrayList<Integer> classArrayTypes = new ArrayList<Integer>();
         ArrayList<ClassSchedule> lectures = new ArrayList<ClassSchedule>();
@@ -449,7 +577,7 @@ public class Application {
             System.out.print("\nEnter the new Course Code: ");
             courseCode = sc.nextLine();
             System.out.println("\nHere are the schools available:");
-            Course.printSchoolType();
+            CourseList.printSchoolType();
             System.out.print("Enter the school: ");
             school = sc.nextLine();
         } while (!(CourseList.newCourse(courseCode, school)));
@@ -465,12 +593,11 @@ public class Application {
         // will follow its framework.
 
         CourseList.printAllIndex();
-        do {
-            System.out.print("\nEnter the new indexNumber for your first index : ");
-            indexNum = sc.nextInt();
-            System.out.print("Enter the vacancy: ");
-            vacancy = sc.nextInt();
-        } while (!(CourseList.newIndexNumber(courseCode, indexNum, vacancy)));
+
+        indexNum = CourseList.newIndexNumber(sc, courseCode); // User input placed inside the Courselist method instead,
+                                                              // so don't
+        // have to keep
+        // calling the CourseList class
 
         System.out.println(
                 "\n==========================================================================================");
@@ -485,10 +612,16 @@ public class Application {
 
         // TEST
         ArrayList<Integer> test = new ArrayList<Integer>();
-        int testInput;
+        int serial1;
 
         for (int k = 0; k < classNum; k++) { // Will iterate thru all the classes defined
+            serial1 = -1; // Reset both serial number to -1
+            temp1 = 0;
+            temp2 = 0;
+            temp3 = 0;
+            temp4 = 0;
             System.out.println("\n===== Enter class " + (k + 1) + " =====");
+            // **** CLASSTYPE SELECTION ****
             System.out
                     .print("\nClass types available:\n" + "1)Lecture\n" + "2)Tutorial\n" + "3)Laboratory Session\n\n");
             while (true) {
@@ -501,7 +634,8 @@ public class Application {
                 classArrayTypes.add(classType);
                 break;
             }
-            System.out.print("\nClass week type:\n" + "1)Normal\n" + "2)Odd\n" + "3)Even\n\n");
+            // **** WEEKTYPE SELECTION ****
+            System.out.print("\nClass week type:\n" + "1)Normal\n" + "2)Even\n" + "3)Odd\n\n");
             while (true) {
                 System.out.print("Enter Week type: ");
                 weekType = sc.nextInt();
@@ -509,9 +643,16 @@ public class Application {
                     System.out.println("Invalid Input, enter from 1 to 3!\n");
                     continue;
                 }
-                testInput = weekType;
+                if (weekType == 1) {
+                    serial1 = 2; // This value will represent normal weeks. Its significance will be seen in the
+                                 // start time selection
+                } else if (weekType == 2)
+                    serial1 = 0;
+                else
+                    serial1 = 1;
                 break;
             }
+            // **** DAYOFTHEWEEK SELECTION ****
             System.out.println("Choose which day the class is held on.\n" + "Monday = 1\n" + "Tuesday = 2\n" + "...\n"
                     + "Friday = 5\n");
             while (true) {
@@ -521,13 +662,15 @@ public class Application {
                     System.out.println("Invalid Input, enter from 1 to 5!\n");
                     continue;
                 }
-                testInput = testInput + dayOfTheWeek * 100000; // Added as the last digit
+                serial1 = serial1 + (dayOfTheWeek * 100000); // Added as the First digit. Mainly to improve searching
+                // as it would be easier to sort in the list
                 break;
             }
 
             System.out.println("Note that classes can only have a duration made up of full"
                     + " hour or half and hour.\nEg. Class duration of 1h 30 min = valid"
                     + "\nEg. Class duration of 1h 45 min = invalid" + "\nUsing 24 Hour Format. Eg. 10AM = 1000");
+
             // **** STARTTIME SELECTION ****
             while (true) {
                 try {
@@ -535,13 +678,23 @@ public class Application {
                     System.out.print("Set the start time: ");
                     startTime = sc.nextInt();
                     // startTime = Integer.parseInt(startStr);
-                    testInput = testInput + (startTime * 10);
+                    if ((serial1 - 2) % 10 == 0) {
+                        temp1 = (serial1 - 2) + (startTime * 10); // Even week check
+                        temp2 = (serial1 - 1) + (startTime * 10); // Odd week check
+                    }
+                    temp1 = serial1 + (startTime * 10);
                     if ((startTime < 800) || (startTime > 1900))
                         throw new Exception("Error! Start time cannot be earlier than 8AM or later than 7PM!\n"
                                 + "Please enter a valid time!");
-                    if (test.contains(testInput))
+                    if (test.contains(temp1))
                         throw new Exception("Error! Start time cannot clash with other classes in this index!\n"
                                 + "Please enter a valid time!");
+                    if (temp2 != 0) // Check temp2 only if the class is set to be normal week
+                    {
+                        if (test.contains(temp2))
+                            throw new Exception("Error! Start time cannot clash with other classes in this index!\n"
+                                    + "Please enter a valid time!");
+                    }
                     if ((startTime % 100 != 30) && (startTime % 100 != 0))
                         throw new Exception("Error! Start time can only start at each hour or half and hour\n"
                                 + "Please enter a valid time!");
@@ -549,72 +702,94 @@ public class Application {
                     System.out.println(e.getMessage());
                     continue;
                 }
-                test.add(testInput); // Add the final serial code into test arraylist
-                testInput -= (startTime * 10); // Reset testInput back to not having startTime value
+                // Note that start time will only be added to the arraylist once end time is
+                // confirmed to not clash with any class timings
                 break;
             }
             // **** ENDTIME SELECTION ****
-            int totalHalfInterval, temp1, temp2;
+
             while (true) {
                 try {
                     sc.nextLine();
                     System.out.print("Set the end time: ");
                     endTime = sc.nextInt();
                     // endTime = Integer.parseInt(endStr);
-                    if ((endTime < 800) || (endTime > 1900))
+                    if ((endTime < 800) || (endTime > 1900) || (startTime == endTime))
                         throw new Exception(
                                 "Error! End time cannot be the same as start time, earlier than 8AM or later than 7PM!\n"
                                         + "Please enter a valid time!");
                     if ((endTime % 100 != 30) && (endTime % 100 != 0))
                         throw new Exception("Error! Start time can only start at each hour or half and hour\n"
                                 + "Please enter a valid time!");
-                    temp1 = endTime - startTime;
+                    temp3 = endTime - startTime;
 
-                    if (temp1 % 100 == 30) {
-                        totalHalfInterval = ((temp1 - 30) / 100) * 2 + 1; // So for 2 hours or temp1 = 200, total # of
+                    if (temp3 % 100 == 30) {
+                        totalHalfInterval = ((temp3 - 30) / 100) * 2 + 1; // So for 2 hours or temp3 = 200, total # of
                                                                           // half hour interval = 4
                     } else {
-                        totalHalfInterval = (temp1 / 100) * 2;
+                        totalHalfInterval = (temp3 / 100) * 2;
                     }
+                    temp4 = startTime;
 
-                    temp1 = testInput; // We reuse temp1 here and testInput which now do not contain any timeslot code
-                                       // Eg. Only the weektype and dayOfTheWeek is in testInput(100001)
-                    temp2 = startTime;
-
-                    for (int j = 0; j < totalHalfInterval; j++) {
-                        temp1 = temp1 + (temp2 * 10);
-                        if (test.contains(temp1))
-                            throw new Exception("Error! Start time cannot clash with other classes in this index!\n"
-                                    + "Please enter a valid time!");
-                        temp1 -= (temp2 * 10);
-                        temp2 += 30;
-                        if (temp2 % 60 == 0) {
-                            temp2 += 40;
+                    for (int j = 1; j < totalHalfInterval; j++) { // Checks if there is any clashes between existing
+                                                                  // timeslots and the period
+                        temp1 = temp1 - (temp4 * 10);
+                        temp4 = temp4 + 30;
+                        if (temp4 % 60 == 0) {
+                            temp4 = temp4 + 40;
                         }
+                        temp1 = temp1 + (temp4 * 10); // between this class start time and end time.
+                        if (test.contains(temp1))
+                            throw new Exception("Error! Time " + temp1 + " clashes with one of your class timings!\n"
+                                    + "Please enter a valid time!");
+                        if (temp2 != 0) // For normal week, they have 2 serial numbers, so have to check both
+                        {
+                            temp2 = temp2 + (temp4 * 10);
+                            if (test.contains(temp2))
+                                throw new Exception("Error! Time " + temp2
+                                        + " clashes with one of your class timings!\n" + "Please enter a valid time!");
+                            temp2 = temp2 - (temp4 * 10);
+                        }
+
                     }
 
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     continue;
                 }
-                for (int j = 0; j < totalHalfInterval; j++) {
-                    temp1 = temp1 + (temp2 * 10);
-                    test.add(testInput);
-                    temp1 -= (temp2 * 10);
-                    temp2 += 30;
-                    if (temp2 % 60 == 0) {
-                        temp2 += 40;
+
+                temp1 = serial1;
+                if ((serial1 - 2) % 10 == 0) // Normal week check
+                {
+                    temp1 = (serial1 - 2); // Even week check
+                    temp2 = (serial1 - 1); // Odd week check
+                }
+                temp4 = startTime;
+
+                for (int j = 0; j < totalHalfInterval; j++) { // Adds the timeslots to the timeslot arraylist from start
+                                                              // to end time.
+                    temp1 = temp1 + (temp4 * 10); // So if the class is from 1000 to 1100, the time slots to be added
+                    test.add(temp1); // will be 110001 and 110301. This is done only when the check above
+                    temp1 = temp1 - (temp4 * 10);
+                    if (temp2 != 0) {
+                        temp2 = temp2 + (temp4 * 10);
+                        test.add(temp2);
+                        temp2 = temp2 - (temp4 * 10);
+                    }
+                    temp4 = temp4 + 30;
+                    if (temp4 % 60 == 0) {
+                        temp4 = temp4 + 40;
                     }
                 }
                 break;
             }
 
-            System.out.print("Set the venue: "); // Maybe have a separate hashmap which stores all the location in NTU
-            venue = sc.nextLine();
+            venue = CourseList.setVenueVacancy(sc, totalHalfInterval, test);
+
             indexDetails = indexDetailsConverter(classType, weekType, dayOfTheWeek);
 
             CourseList.newSchedule(indexNum, indexDetails[0], indexDetails[1], indexDetails[2], startTime, endTime,
-                    venue);
+                    venue, totalHalfInterval, test);
             if (classType == 1) {
                 ClassSchedule lecture = new ClassSchedule("Lecture", indexDetails[1], indexDetails[2], startTime,
                         endTime, venue);
@@ -693,7 +868,7 @@ public class Application {
     }
 
     // ****** Method to update a course ******
-    private static void UpdateCourse(Scanner sc) {
+    private static void updateCourse(Scanner sc) {
         String courseCode, newCourseCode;
         int choice;
         CourseList.printAllCourse();
@@ -716,7 +891,7 @@ public class Application {
                 break;
             case 2:
                 // change course code school
-                CourseList.updateCourseCodeSchool(sc, courseCode);
+                CourseList.updateCourseSchool(sc, courseCode);
                 break;
             case 3:
                 // remove course
@@ -724,27 +899,20 @@ public class Application {
                 break;
             case 4:
                 // add new index number
-                System.out.println("Enter new Index Number: ");
-                int newindexNumber = sc.nextInt();
-                System.out.println("Enter new Index Number's Vacancy: ");
-                int newVacancy = sc.nextInt();
-                CourseList.newIndexNumber(courseCode, newindexNumber, newVacancy);
+                // System.out.println("Enter new Index Number: ");
+                // int newindexNumber = sc.nextInt();
+                // System.out.println("Enter new Index Number's Vacancy: ");
+                // int newVacancy = sc.nextInt();
+                // CourseList.newIndexNumber(courseCode, newindexNumber, newVacancy);
+                CourseList.newIndexNumber(sc, courseCode);
                 break;
             case 5:
                 // change index number digits
-                System.out.println("Enter Index Number to change: ");
-                int currentIndexNumber = sc.nextInt();
-                System.out.println("Enter updated Index Number: ");
-                int updatedIndexNumber = sc.nextInt();
-                CourseList.updateIndexNumber(courseCode, currentIndexNumber, updatedIndexNumber);
+                CourseList.updateIndexNumber(sc, courseCode);
                 break;
             case 6:
                 // update index number vacancy
-                System.out.println("Enter Index Number: ");
-                int indexNum = sc.nextInt();
-                System.out.println("Enter new Vacancy: ");
-                int updateVacancy = sc.nextInt();
-                CourseList.updateIndexNumVacancy(courseCode, indexNum, updateVacancy);
+                CourseList.updateIndexNumVacancy(sc, courseCode);
                 break;
             case 7:
                 // update index number schedule
@@ -753,7 +921,7 @@ public class Application {
                 int indexNum2 = sc.nextInt();
                 System.out.println("Enter new Index Number's Schedule: ");
                 int updateSchedule = sc.nextInt();
-                // CourseList.updateIndexNumSchedule(courseCode, indexNum2, updateSchedule); //
+                // CourseList.updateIndexNumSchedule(courseCode, indexNum2, updateSchedule);
                 // haven't create yet
                 break;
             case 8:
@@ -785,10 +953,10 @@ public class Application {
                 convert[1] = "Normal";
                 break;
             case 2:
-                convert[1] = "Odd";
+                convert[1] = "Even";
                 break;
             case 3:
-                convert[1] = "Even";
+                convert[1] = "Odd";
                 break;
         }
         switch (dayOfTheWeek) {
@@ -834,8 +1002,8 @@ public class Application {
     private static int getNumTimeslots(int start, int end) {
         int num = 0;
         while (start != end) {
-            start += 30;
-            num += 1;
+            start = start + 30;
+            num = 1;
             if (start % 100 == 60) {
                 start += 40;
             }
