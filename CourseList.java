@@ -4,9 +4,9 @@ import java.io.*;
 public class CourseList {
 
 	private static HashMap<String, Course> mapCourse = null;
-	private static HashMap<Integer, IndexNum> indexList = null;
-	private static ArrayList<String> schoolType;
+	private static TreeMap<Integer, IndexNum> indexList = null; // changed this to tree map to allow printing in order
 	private static HashMap<String, ArrayList<Integer>> venueLoc;
+	private static HashMap<String, ArrayList<String>> schoolMapCourse;
 	// venueLoc hashmap is used to keep track of the vacancy of each venue. So
 	// each venue has its own timetable. The timeslot will be represented as serial
 	// number of integer type as
@@ -24,10 +24,10 @@ public class CourseList {
 	public CourseList() {
 		mapCourse = new HashMap<String, Course>();
 
-		schoolType = new ArrayList<String>();
-		schoolType.add("Computer Science");
-		schoolType.add("Engineering");
-		schoolType.add("Philosophy");
+		schoolMapCourse = new HashMap<String, ArrayList<String>>();
+		schoolMapCourse.put("Computer Science", new ArrayList<String>(Arrays.asList("CZ2001")));
+		schoolMapCourse.put("Engineering", new ArrayList<String>(Arrays.asList("CZ2002")));
+		schoolMapCourse.put("Philosophy", new ArrayList<String>(Arrays.asList("PH2018")));
 
 		Course c1 = new Course("CZ2001", "Computer Science");
 		Course c2 = new Course("CZ2002", "Engineering");
@@ -37,7 +37,7 @@ public class CourseList {
 		mapCourse.put("CZ2002", c2);
 		mapCourse.put("PH2018", c3);
 
-		indexList = new HashMap<Integer, IndexNum>();
+		indexList = new TreeMap<Integer, IndexNum>();
 
 		IndexNum i1 = new IndexNum(1024, 10);
 		IndexNum i2 = new IndexNum(1025, 2);
@@ -52,13 +52,13 @@ public class CourseList {
 		venueLoc.put("TR1", new ArrayList<Integer>());
 		venueLoc.put("SWLAB", new ArrayList<Integer>());
 
-		ClassSchedule sc1 = new ClassSchedule("Lecture", "Normal", "Monday", 1000, 1200, "LT2A");
-		ClassSchedule sc2 = new ClassSchedule("Tutorial", "Normal", "Tuesday", 1000, 1200, "TR1");
-		ClassSchedule sc3 = new ClassSchedule("Tutorial", "Normal", "Monday", 1300, 1400, "TR1");
-		ClassSchedule sc4 = new ClassSchedule("Lecture", "Normal", "Wednesday", 1100, 1300, "LT2A");
-		ClassSchedule sc5 = new ClassSchedule("Lecture", "Normal", "Wednesday", 1100, 1300, "LT1A");
-		ClassSchedule sc6 = new ClassSchedule("Laboratory Session", "Odd", "Tuesday", 1000, 1200, "SWLAB");
-		ClassSchedule sc7 = new ClassSchedule("Laboratory Session", "Even", "Tuesday", 1000, 1200, "SWLAB");
+		Timetable sc1 = new Timetable("Lecture", "Normal", "Monday", 1000, 1200, "LT2A");
+		Timetable sc2 = new Timetable("Tutorial", "Normal", "Tuesday", 1000, 1200, "TR1");
+		Timetable sc3 = new Timetable("Tutorial", "Normal", "Monday", 1300, 1400, "TR1");
+		Timetable sc4 = new Timetable("Lecture", "Normal", "Wednesday", 1100, 1300, "LT2A");
+		Timetable sc5 = new Timetable("Lecture", "Normal", "Wednesday", 1100, 1300, "LT1A");
+		Timetable sc6 = new Timetable("Laboratory Session", "Odd", "Tuesday", 1000, 1200, "SWLAB");
+		Timetable sc7 = new Timetable("Laboratory Session", "Even", "Tuesday", 1000, 1200, "SWLAB");
 
 		venueLoc.get("LT2A").add(110001);
 		venueLoc.get("LT2A").add(110301);
@@ -147,8 +147,8 @@ public class CourseList {
 			FileInputStream fis = new FileInputStream("IndexList.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			Object temp = ois.readObject();
-			if (temp instanceof HashMap<?, ?>) {
-				indexList = (HashMap<Integer, IndexNum>) temp;
+			if (temp instanceof TreeMap<?, ?>) {
+				indexList = (TreeMap<Integer, IndexNum>) temp;
 			}
 			ois.close();
 			fis.close();
@@ -191,95 +191,34 @@ public class CourseList {
 		}
 	}
 
-	// ****** PRINT SCHOOL TYPE ******
-	public static void printSchoolType() {
-		for (String i : schoolType) {
-			System.out.println(i);
-		}
-	}
+	// ****** PRINT ALL COURSE/BASED ON SCHOOL IN EXISTENCE ******
+	public static void printAllCourse(String school) // School entry only used for admin updating course. Other purpose
+														// will have
+	{ // school parameter default value of null
 
-	// ****** Method to check venue vacancy during course creation ******
-	public static String setVenueVacancy(Scanner sc, int totalHalfInterval, ArrayList<Integer> timeslots) {
-		String venue;
-		boolean clash;
-		while (true) {
-			clash = false;
-			System.out.print("Set the venue: ");
-			venue = sc.nextLine();
-			if (!(venueLoc.containsKey(venue))) {
-				System.out.println("\nThis venue does not exist! Please enter a valid venue!");
-				continue;
-			}
-			for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
-				if (venueLoc.get(venue).contains(timeslots.get(i))) {
-					clash = true;
-					System.out.println(
-							venue + " is occupied at " + timeslots.get(i) + ". Please enter a different venue.");
-					break;
+		int k = 0;
+		System.out.println("\nCurrent Courses available:");
+		if (!(school.equals("null"))) {
+			ArrayList<String> temp = schoolMapCourse.get(school);
+			for (int i = 0; i < temp.size(); i++) {
+				System.out.print(temp.get(i) + "\t");
+				k++;
+				if (k % 4 == 0) {
+					System.out.print("\n");
 				}
 			}
-			if (clash)
-				continue;
-			for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
-				venueLoc.get(venue).add(timeslots.get(i));
+		}
+		for (int j = 0; j < schoolMapCourse.size(); j++) {
+			for (int l = 0; l < schoolMapCourse.get(j).size(); l++) {
+				ArrayList<String> temp = schoolMapCourse.get(l);
+				for (int i = 0; i < temp.size(); i++) {
+					System.out.print(temp.get(i) + "\t");
+					k++;
+					if (k % 4 == 0) {
+						System.out.print("\n");
+					}
+				}
 			}
-			break;
-		}
-		return venue;
-	}
-
-	// ****** Method to print student by index ******
-	public static void printStudentByIndex(int indexNum) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		System.out.println("\nStudent list of Course index number " + indexNum + ":\n");
-		ArrayList<String> students = indexList.get(indexNum).getRegisteredStudentList();
-		for (int i = 0; i < students.size(); i++) {
-			System.out.println((i + 1) + ") " + students.get(i));
-		}
-		if (students.size() == 0) {
-			System.out.println("<Empty>\n");
-		}
-	}
-
-	// ****** Method to print student by course ******
-	public static void printStudentByCourse(String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		System.out.println("\nStudent list of Course " + courseCode + ":\n");
-		int[] listOfIndexNum = mapCourse.get(courseCode).getIndexNumber();
-		ArrayList<String> listOfStudentsByIndex = new ArrayList<>();
-		ArrayList<String> listOfStudentsByCourse = new ArrayList<>();
-		for (int i = 0; i < listOfIndexNum.length; i++) {
-			listOfStudentsByIndex = indexList.get(listOfIndexNum[i]).getRegisteredStudentList();
-			for (int j = 0; j < listOfStudentsByIndex.size(); j++) {
-				listOfStudentsByCourse.add(listOfStudentsByIndex.get(j));
-			}
-			listOfStudentsByIndex.clear();
-		}
-		for (int k = 0; k < listOfStudentsByCourse.size(); k++) {
-			System.out.println((k + 1) + ") " + listOfStudentsByCourse.get(k));
-		}
-		if (listOfStudentsByCourse.size() == 0) {
-			System.out.println("<Empty>\n");
-		}
-	}
-
-	// ****** Method to print all courses in existence ******
-	public static void printAllCourse() {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		int k = 0;
-		ArrayList<String> temp = new ArrayList<String>();
-		for (String i : mapCourse.keySet()) {
-			temp.add(i);
-		}
-		Collections.sort(temp);
-		System.out.println("\nCurrent Courses available:");
-		for (int j = 0; j < temp.size(); j++) {
 			System.out.print(temp.get(j) + "\t");
 			k++;
 			if (k % 4 == 0) {
@@ -288,60 +227,38 @@ public class CourseList {
 		}
 		System.out.print("\n");
 	}
+
+	// ****** PRINT ALL COURSE IN EXISTENCE ******
+	/*
+	 * public static void printAllCourse() { if (indexList == null | mapCourse ==
+	 * null) { loadCourseList(); } int k = 0; ArrayList<String> temp = new
+	 * ArrayList<String>(); for (String i : mapCourse.keySet()) { temp.add(i); }
+	 * Collections.sort(temp); System.out.println("\nCurrent Courses available:");
+	 * for (int j = 0; j < temp.size(); j++) { System.out.print(temp.get(j) + "\t");
+	 * k++; if (k % 4 == 0) { System.out.print("\n"); } } System.out.print("\n"); }
+	 */
 
 	// ****** Method to print all Indexes in existence ******
 	public static void printAllIndex() {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-		int k = 0;
-		ArrayList<Integer> temp = new ArrayList<Integer>();
-		for (Integer i : indexList.keySet()) {
-			temp.add(i);
-		}
-		Collections.sort(temp);
-		System.out.println("\nCurrent Indexes available:");
-		for (int j = 0; j < temp.size(); j++) {
-			System.out.print(temp.get(j) + "\t");
-			k++;
-			if (k % 4 == 0) {
-				System.out.print("\n");
-			}
-		}
-		System.out.print("\n");
-	}
 
-	// ****** Method to print course info ******
-	public static void printCourseInfo(String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
+		// iterate through and get sorted index num keys
+		for (Map.Entry<Integer, IndexNum> entry : indexList.entrySet()) {
+			System.out.println(entry.getKey());
 		}
-		mapCourse.get(courseCode).printCourse();
-	}
-
-	// ****** Method to print all indexes in a course ******
-	public static void printIndexOfCourse(String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		int[] temp = mapCourse.get(courseCode).getIndexNumber();
-		System.out.println("Total Index Numbers of " + courseCode + " : " + temp.length);
-		for (int i = 0; i < temp.length; i++) {
-			System.out.println("========================");
-			indexList.get(temp[i]).printIndex();
-		}
-		System.out.println("========================\n");
 	}
 
 	// ****** Method to check course existence ******
-	public static boolean checkCourseExistence(String courseCode) {
-		if (indexList == null | mapCourse == null) {
+	public static boolean checkCourseExistence(String courseCode) { // Should we add school as an argument? So if admin
+																	// from school A tries
+		if (indexList == null | mapCourse == null) { // to edit courses from school B, it will produce an error message
 			loadCourseList();
 		}
 		if (mapCourse.containsKey(courseCode))
 			return true;
 		else {
-			System.out.println("The Course code does not exist!\nPlease enter the correct Course code!");
 			return false;
 		}
 	}
@@ -354,168 +271,41 @@ public class CourseList {
 		if (indexList.containsKey(indexNum))
 			return true;
 		else {
-			System.out.println("The Index Number does not exist!\nPlease enter the correct Index Number!");
-			return false;
+			return false; // if does not contain
 		}
 	}
 
 	// ****** Method to create new course ******
-	public static boolean newCourse(String courseCode, String school) throws CourseAlreadyExist {
-		// Since we are simply adding the new course to the Courselist hashmap, we must
-		// make sure the hashmap
-		// exist in the first place. In case we cannot load the serealized file.
+	public static Course newCourse(String courseCode, String school) {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-
-		// Check if courseCode number already exist! If yes, different number must be
-		// entered
-		if (mapCourse.containsKey(courseCode)) {
-			System.out.println("\nThe Course code already exist! Please enter a new Course code!");
-			return false;
-		}
 		if (!(schoolType.contains(school))) {
-			System.out.println("\nThe school entered does not exist! Please enter a valid school!");
-			return false;
+			schoolType.add(school);
 		}
 		Course c = new Course(courseCode, school);
 		mapCourse.put(courseCode, c);
 		CourseList.saveCourseMap(); // Save map immediately after creating new Course
-		return true;
+		return c;
 	}
 
 	// ****** Method to Create a new Index Number for a Course ******
-	public static int newIndexNumber(Scanner sc, String courseCode) {
-		int indexNumber, vacancy;
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		while (true) {
-			System.out.print("\nEnter the new indexNumber: ");
-			indexNumber = sc.nextInt();
-			System.out.print("Enter the vacancy: ");
-			vacancy = sc.nextInt();
-			if (indexList.containsKey(indexNumber)) {
-				System.out.println("\nThis index number already exist!\nPlease enter a different index number!");
-			} else
-				break;
-		}
-		IndexNum i = new IndexNum(indexNumber, vacancy);
-		indexList.put(indexNumber, i);
-		mapCourse.get(courseCode).setIndexNumber(indexNumber, indexList.get(indexNumber));
-		return indexNumber;
-	}
-
-	// ****** Method to Create a new schedule for an indexnumber ******
-	public static void newSchedule(int indexNumber, String classType, String weekType, String dayOfTheWeek,
-			int startTime, int endTime, String venue, int totalHalfInterval, ArrayList<Integer> timeslots) {
-		ArrayList<Integer> temp = new ArrayList<Integer>();
-		for (int i = timeslots.size() - 1; i >= (timeslots.size() - totalHalfInterval); i--) {
-			temp.add(timeslots.get(i));
-		}
-		Collections.sort(temp); // Sort the timeslots of this new schedule
-		ClassSchedule sch = new ClassSchedule(classType, weekType, dayOfTheWeek, startTime, endTime, venue, temp);
-		indexList.get(indexNumber).addClassSchedule(startTime, sch);
-		// CourseList.saveCourseMap();
-	}
-
-	// ****** Similar to above except create similar lecture schedules for each
-	// index number in the same course ******
-	public static void newSchedule(int indexNumber, ClassSchedule lecture) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-
-		indexList.get(indexNumber).addSchedule(lecture);
-		// CourseList.saveCourseMap();
+	public static void newIndexNumbers(HashMap<Integer, IndexNum> indexmap) {
+		indexmap.putAll(indexmap);
 	}
 
 	// IRS: Since the requirement didn't include remove course, should we not
 	// include it?
 
-	// ****** Method to Change the Course Code name (Admin) ******
-	public static void updateCourseCode(Scanner sc, String currentCourseCode) {
+	// ****** CHANGE COURSE CODE NAME (Admin) ******
+	public static void updateCourseCode(String newCourseCode, String currentCourseCode) {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-
-		String newCourseCode;
-		while (true) {
-			System.out.println("Enter new course code name: ");
-			newCourseCode = sc.nextLine();
-			if (checkCourseExistence(newCourseCode))
-				System.out.println("This course code already exist! Please enter a different course code!\n");
-			else
-				break;
-		}
-		Course c = mapCourse.remove(currentCourseCode);
+		Course c = getCourse(currentCourseCode);
 		c.setcourseCode(newCourseCode);
 		mapCourse.put(newCourseCode, c);
-	}
-
-	// ****** Method to Change the Course Code Schoo Type (Admin) ******
-	public static void updateCourseSchool(Scanner sc, String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		while (true) {
-			String currentSchType = mapCourse.get(courseCode).getSchool();
-			System.out.println("Enter a new School for Course code (" + courseCode + "): ");
-			String newSchool = sc.nextLine();
-			if (!(schoolType.contains(newSchool))) {
-				System.out.println("\nPlease enter a valid school!");
-				continue;
-			}
-			if (newSchool.equals(currentSchType)) {
-				System.out
-						.println("You have entered the same school for this course code!\nPlease re-enter the school!");
-				continue;
-			}
-			mapCourse.get(courseCode).setSchool(newSchool);
-			break;
-		}
-	}
-
-	// ****** Method to Change the Index Number digits of a Course (Admin) ******
-	public static void updateIndexNumber(Scanner sc, String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		int currentIndexNumber;
-		int updatedIndexNumber;
-		while (true) {
-			System.out.println("Enter Index Number to change: ");
-			currentIndexNumber = sc.nextInt();
-			if (!(indexList.containsKey(currentIndexNumber))) {
-				System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
-			} else
-				break;
-		}
-		System.out.println("\nEnter updated Index Number: ");
-		updatedIndexNumber = sc.nextInt();
-		int vacancy = mapCourse.get(courseCode).getIndexVacancy(currentIndexNumber);
-		IndexNum i = new IndexNum(updatedIndexNumber, vacancy);
-		indexList.put(updatedIndexNumber, i);
-		mapCourse.get(courseCode).setIndexNumber(updatedIndexNumber, indexList.get(updatedIndexNumber));
-		mapCourse.remove(currentIndexNumber, indexList.get(currentIndexNumber));
-	}
-
-	public static void updateIndexNumVacancy(Scanner sc, String courseCode) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		int indexNum;
-		while (true) {
-			System.out.println("Enter Index Number: ");
-			indexNum = sc.nextInt();
-			if (!(indexList.containsKey(indexNum))) {
-				System.out.println("\nThis index number does not exist!\nPlease enter a different index number!");
-			} else
-				break;
-		}
-		System.out.println("Enter new Vacancy: ");
-		int updateVacancy = sc.nextInt();
-		indexList.get(indexNum).setVacancy(updateVacancy);
+		mapCourse.remove(currentCourseCode);
 	}
 
 	// TODO: Refer to updateCourse Method in application class. We will have
@@ -526,9 +316,9 @@ public class CourseList {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-
+		coursecode = coursecode.toUpperCase();
 		if (mapCourse.containsKey(coursecode)) {
-			boolean bool = mapCourse.get(coursecode).addCourse(index, username);
+			boolean bool = getCourse(coursecode).addCourse(index, username);
 			return bool;
 		}
 
@@ -551,6 +341,8 @@ public class CourseList {
 			loadCourseList();
 		}
 
+		coursecode = coursecode.toUpperCase();
+
 		if (mapCourse.containsKey(coursecode)) {
 			mapCourse.get(coursecode).dropCourse(index, username, false);// swopflag=false
 			return;
@@ -567,12 +359,9 @@ public class CourseList {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
-		while (true) {
-			if (!(mapCourse.containsKey(coursecode))) {
-				System.out.println("The course does not exist!\n");
-			} else {
-				break;
-			}
+		coursecode = coursecode.toUpperCase();
+		if (!(mapCourse.containsKey(coursecode))) {
+			System.out.println("The course does not exist!\n");
 		}
 		mapCourse.remove(coursecode);
 	}
@@ -591,6 +380,8 @@ public class CourseList {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
+
+		coursecode = coursecode.toUpperCase();
 
 		if (mapCourse.containsKey(coursecode)) {
 			Course c = mapCourse.get(coursecode);
@@ -612,6 +403,8 @@ public class CourseList {
 			loadCourseList();
 		}
 
+		coursecode = coursecode.toUpperCase();
+
 		int[] temp = mapCourse.get(coursecode).getIndexNumber();
 		System.out.println("Vacancy for course " + coursecode);
 		System.out.println("Index/Vacancy ");
@@ -620,18 +413,12 @@ public class CourseList {
 		}
 	}
 
-	// ****** Method to check index vacancy ******
-	public static int checkVacancies(Integer indexNum) {
-		if (indexList == null | mapCourse == null) {
-			loadCourseList();
-		}
-		return indexList.get(indexNum).getVacancy();
-	}
-
 	public static boolean checkIndex(String coursecode, int index) {
 		if (indexList == null | mapCourse == null) {
 			loadCourseList();
 		}
+
+		coursecode = coursecode.toUpperCase();
 		if (mapCourse.containsKey(coursecode)) {
 			Course c = mapCourse.get(coursecode);
 			return c.checkIndex(index); // true if index matches false otherwise
@@ -647,6 +434,7 @@ public class CourseList {
 	}
 
 	public static Course getCourse(String course) {
+		course = course.toUpperCase();
 		return mapCourse.get(course);
 	}
 
@@ -655,76 +443,3 @@ public class CourseList {
 	// --to swop index with students
 
 }
-
-// ****** Method to GET index object from hashmap ******
-// public static IndexNum getIndexObject(Integer indexNum) {
-// return indexList.get(indexNum);
-// }
-
-// ****** Method to GET all indexes in that course ******
-// public static int[] getCourseIndex(String courseCode) {
-// return mapCourse.get(courseCode).getIndexNumber();
-// }
-
-// ****** Method to get course object from hashmap ******
-// public static Course getCourseObject(String courseCode) {
-// return mapCourse.get(courseCode);
-// }
-
-/*
- * public static void readCourseList() { String filePath = "test.txt";
- * //HashMap<String, String> map = new HashMap<String, String>();
- * 
- * String line; BufferedReader reader = new BufferedReader(new
- * FileReader(filePath)); while ((line = reader.readLine()) != null) { String[]
- * parts = line.split(":", 2); if (parts.length >= 2) { String key = parts[0];
- * String objectSia = parts[1]; String[] partSia = objectSia.split("|", 3); if
- * (partSia.length >= 3) { String courseCode = partSia[0]; String school =
- * partSia[1]; String courseType = partSia[2];
- * 
- * Course value = new Course(courseCode, school, courseType); mapCourse.put(key,
- * value); } //String value = parts[1]; } else {
- * System.out.println("ignoring line: " + line); } } }
- */
-// Attributes needed: (Yes, literally only one attribute needed)
-// Hashmap <String, Course>
-// --maps "CE2002" to Object CE2002
-// TODO: Add method to load and save hashmap.
-// OR:: Load and save hashmap with every method
-// OR:: Have a check at the start of the function. If hashmap is empty, load the
-// hashmap
-// --If file isnt found, create new hashmap
-// --else, load the file and assign to hashmap.
-// ----save before exiting the method if the hashmap is edited.
-// ----also update static hashmap attribut in this class
-// ----personally recommend this method as its safer :)
-
-// PrintAll()
-// -- prints all courses in a list
-// --If yall very free, can also filter by school etc... but this isnt required
-/*
- * public void PrintAll() { for (Map.Entry<String, Course> entry :
- * mapCourse.entrySet()) { System.out.println(entry.getKey()); } }
- */
-
-// Print course(String course, int index)
-// --for student to print the courses they have registered for
-
-// --- I think this one should be placed in the Student Class since there is a
-// hashmap which stores the
-// registered courses of each student.---
-// YuHui: This hashmap only stores the course name and index. Need this method
-// to call for course description details :)
-// YuHui: But if we arent planning on displaying this info, then its ok.. Its
-// just more convenient to add more deets in the future if we really need to.
-
-// 2 methods, print student list by index number
-// print student list by course
-
-// Newcourse(String coursecode, Hashmap <int, int> indexNumMappedtoVacancies,
-// ...)
-// --for admin to add new courses
-// --Create new Course object & set attributes
-// --adds newly created Course object to hashmap with String coursecode as key
-// For method NewCourse, it is for the admin to add a totally new course into
-// the list

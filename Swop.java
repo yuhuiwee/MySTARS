@@ -161,4 +161,4 @@ class SwopGroup {
         return student2;
     }
 
-}e
+}

@@ -159,7 +159,7 @@ public class AccessPeriod implements Serializable {
         }
     }
 
-    public static void removeMajorAccess(String major, int year) throws AccessPeriodNotFound {
+    public static void removeMajorAccess(String major, int year) {
         String key = String.join(",", major.toLowerCase(), String.valueOf(year));
         if (majoracc.containsKey(key)) {
             System.out.printf("Removing Access Period for %s, Year %d", major, year);
@@ -168,7 +168,8 @@ public class AccessPeriod implements Serializable {
         }
 
         else {
-            throw new AccessPeriodNotFound("Input Error! Access Period not found!");
+            System.out.println("Error! Access period for " + major + " Year: " + year + "not found!");
+            return;
         }
     }
 

@@ -9,20 +9,22 @@ public class IndexNum implements Serializable {
     private static final long serialVersionUID = 1L;
     private int vacancy;
     private int indexNumber;
-    private TreeMap<Integer, ClassSchedule> classSchedules; // Integer = startTime of each class, ClassSchedule = class
-                                                            // schedule object
+    private Timetable classSchedule;
     private ArrayList<String> listOfRegisteredStudents;
     private ArrayList<String> waitingList;
 
     public IndexNum(int indexNumber, int vacancy) {
         this.indexNumber = indexNumber;
         this.vacancy = vacancy;
-        classSchedules = new TreeMap<Integer, ClassSchedule>();
+        this.classSchedule = new Timetable();
         listOfRegisteredStudents = new ArrayList<String>(); // So when index 1024 created, it also creates
         waitingList = new ArrayList<String>(); // these 2 lists.
     }
 
     /* ----------- Get Methods ----------- */
+    public Timetable getClassSchedule() {
+        return classSchedule;
+    }
 
     public int getIndexNumber() {
         return indexNumber;
@@ -65,7 +67,7 @@ public class IndexNum implements Serializable {
 
     // TODO: Edited method input variables... please change in class diag
     public void removeStudent(String coursecode, String username, boolean swopFlag)
-            throws UserNotFound, UserAlreadyExists {
+            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash {
         // flag is for the swop to happen without adding in the students in the waiting
         // list
 
@@ -76,9 +78,9 @@ public class IndexNum implements Serializable {
         }
 
         System.out.println("You have been removed from the index.");
-        if (swopFlag || waitingList.isEmpty()) // Swop flag = True -> Just Increase vacancy without adding Students from
-                                               // waitlist
-        {
+        // Swop flag = True -> Just Increase vacancy without adding Students from
+        // waitlist
+        if (swopFlag || waitingList.isEmpty()) {
             vacancy++;
             return;
 
@@ -86,8 +88,9 @@ public class IndexNum implements Serializable {
             int i = 0;
             String user = waitingList.get(i);
             Student st = (Student) PersonList.getByUsername(user);
-            while (!st.verifyTimeslot(getTimeSlots())) { // iterate through waitlist to find 1st student that does not
-                                                         // have timetable clash
+            while (!classSchedule.checkTimeslot(st.getTimetable())) {
+                // iterate through waitlist to find 1st student that does not have timetable
+                // clash
                 i++;
                 user = waitingList.get(i);
                 st = (Student) PersonList.getByUsername(user);
@@ -100,52 +103,33 @@ public class IndexNum implements Serializable {
         }
     }
 
-    public void addClassSchedule(int startTime, ClassSchedule sch) {
-        classSchedules.put(startTime, sch); // Schedule object not created here as we might need a list which keeps
-                                            // records
-        // of all schedule
-        // to prevent any clash in terms of timing or venue.
+    public void addClassSchedule(Timetable t) throws TimetableClash {
+        classSchedule.mergeTimetable(t);
     }
-
-    public ClassSchedule getClassSchedule(Integer time) {
-        return classSchedules.get(time);
-    }
-
-    // public void printStudentListOfIndex() {
-    // if (listOfRegisteredStudents.size() == 0) {
-    // System.out.println("<Empty>\n");
-    // }
-    // for (int i = 0; i < listOfRegisteredStudents.size(); i++) {
-    // System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
-    // }
-    // }
 
     public void printIndex() {
         System.out.println("Index Number Info: " + indexNumber);
         System.out.println("Vacancy: " + vacancy);
-        for (Map.Entry<Integer, ClassSchedule> entry : classSchedules.entrySet()) {
-            entry.getValue().printSchedule();
-        }
-        /*
-         * for (int i = 0; i < classSchedules.size(); i++) {
-         * classSchedules.get(i).printSchedule(); // }
-         */
     }
 
-    public ArrayList<Integer> getTimeSlots() {
-        // ArrayList<Integer> timings = new ArrayList<Integer>(classSchedules.keySet());
-        // ArrayList<Integer> tempTimings = new ArrayList<Integer>();
-        ArrayList<Integer> allTimings = new ArrayList<Integer>();
-        for (Map.Entry<Integer, ClassSchedule> entry : classSchedules.entrySet()) {
-            allTimings.addAll(entry.getValue().getTimeSlotSerialNumber());
-        }
-        Collections.sort(allTimings);
-        return allTimings;
+    public void printWeeklySchedule() {
+        classSchedule.printWeeklySchedule();
     }
 
-    public void printSchedule() {
-        for (Map.Entry<Integer, ClassSchedule> entry : classSchedules.entrySet()) {
-            entry.getValue().printSchedule();
+    public void printCourseSchedule() {
+        classSchedule.printSchedule();
+    }
+
+    // ****** Method to print student by index ******
+    public void printStudentList() throws UserNotFound, UserAlreadyExists {
+        System.out.println("\nStudent list of Course index number " + String.valueOf(indexNumber) + ":\n");
+        ListIterator<String> i = listOfRegisteredStudents.listIterator();
+        int n = 1;
+        while (i.hasNext()) {
+            String name = i.next();
+            Student s = (Student) PersonList.getByUsername(name);
+            System.out.println(
+                    "\t" + String.valueOf(n++) + ") " + name + String.valueOf(s.getGender()) + s.getNationality());
         }
     }
 }

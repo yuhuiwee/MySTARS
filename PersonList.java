@@ -132,14 +132,10 @@ public class PersonList {
         // Check is username and matric number is already taken!
         if (plist.containsKey(username) & plist != null) {
             throw new UserAlreadyExists("This Username is taken!");
-        } else {
-            for (Person p : plist.values()) {
-                if (p.getMatric() == matric) {
-                    throw new UserAlreadyExists("Matric number is taken!");
-                }
-            }
         }
-
+        if (checkMatricNum(matric)) {
+            throw new UserAlreadyExists("This matric number is already taken!");
+        }
         Student s = new Student(username.toLowerCase(), name.toLowerCase(), matric.toUpperCase(),
                 Character.toUpperCase(gender), nationality.toLowerCase(), major.toLowerCase(), year,
                 email.toLowerCase());
@@ -162,13 +158,6 @@ public class PersonList {
         savePersonMap();
     }
 
-    public static void editStudentDetails(String user, String name, String matric, char gender, String nationality,
-            String major, int year, String email) {
-        Student s = (Student) plist.get(user);
-        s.editStudentDetails(user, name, matric, gender, nationality, major, year, email);
-        savePersonMap();
-    }
-
     public static void newAdmin(String username, String name, String id, char gender, String nationality, String school,
             String position, String email) throws UserAlreadyExists {
         if (plist == null) {
@@ -178,12 +167,9 @@ public class PersonList {
         // Check is username and matric number is already taken!
         if (plist.containsKey(username)) {
             throw new UserAlreadyExists("This Username is taken!");
-        } else {
-            for (Person p : plist.values()) {
-                if (p.getMatric() == id) {
-                    throw new UserAlreadyExists("Matric number is taken!");
-                }
-            }
+        }
+        if (checkMatricNum(id)) {
+            throw new UserAlreadyExists("This matric number is taken!");
         }
 
         Admin ad = new Admin(username.toLowerCase(), name.toLowerCase(), id.toUpperCase(),
@@ -224,25 +210,24 @@ public class PersonList {
         return temp;
     }
 
-    public static void editAdmin(String username, String name, String id, char gender, String nationality,
-            String school, String position, String email) throws UserNotFound, UserAlreadyExists {
-        if (plist == null) {
-            PersonList.loadPersonList();
-        }
-        PersonList.removeAdmin(username);
-        PersonList.newAdmin(username, name, id, gender, nationality, school, position, email);
-        savePersonMap();
-    }
-
     public static boolean checkusername(String username) throws UserAlreadyExists {
         if (plist == null) {
             loadPersonList();
         }
 
-        if (plist.containsKey(username)) {
+        if (plist.containsKey(username.toLowerCase())) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public static boolean checkMatricNum(String matric) {
+        for (Person p : plist.values()) {
+            if (p.getMatric() == matric.toLowerCase()) {
+                return true;
+            }
+        }
+        return false; // return false id matric isnt taken
     }
 }

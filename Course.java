@@ -21,6 +21,7 @@ public class Course implements Serializable {
         this.courseCode = courseCode;
         this.school = school;
         mapIndex = new HashMap<Integer, IndexNum>();
+        au = 3;
     }
 
     /*
@@ -71,8 +72,8 @@ public class Course implements Serializable {
         this.school = school;
     }
 
-    public void setIndexNumber(int key, IndexNum value) {
-        mapIndex.put(key, value);
+    public void setIndexNumber(HashMap<Integer, IndexNum> indexMap) {
+        mapIndex.putAll(indexMap);
     }
 
     /* ----------- Normal Methods ----------- */
@@ -120,9 +121,22 @@ public class Course implements Serializable {
         }
     }
 
-    public void printCourse() {
+    public void rse() {
         System.out.println("Course Info: " + courseCode);
         System.out.println("School: " + school);
+    }
+
+    public void printStudentList() throws UserNotFound, UserAlreadyExists {
+        System.out.println("Course: " + courseCode);
+        for (Map.Entry<Integer, IndexNum> entry : mapIndex.entrySet()) {
+            entry.getValue().printStudentList();
+        }
+    }
+
+    public void printAllIndexVacancies() {
+        for (Map.Entry<Integer, IndexNum> entry : mapIndex.entrySet()) {
+            entry.getValue().printIndex();
+        }
     }
 
     // public void printStudentListOfCourse() {
