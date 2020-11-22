@@ -18,8 +18,8 @@ public class Course implements Serializable {
                                                  // mapIndex.get(1024) to obtain the object indexNum.
 
     public Course(String courseCode, String school) {
-        this.courseCode = courseCode;
-        this.school = school;
+        this.courseCode = courseCode.toUpperCase();
+        this.school = school.toUpperCase();
         mapIndex = new HashMap<Integer, IndexNum>();
         au = 3;
     }
@@ -73,14 +73,14 @@ public class Course implements Serializable {
 
     /* ----------- Normal Methods ----------- */
 
-    public boolean addCourse(int index, String userName) // for students to add course
+    public boolean addCourse(IndexNum ind, String userName) // for students to add course
     {
-        boolean bool = mapIndex.get(index).addStudent(userName); // mapIndex.get(course) = object
+        boolean bool = ind.addStudent(userName); // mapIndex.get(course) = object
         return bool;
     }
 
     public void dropCourse(int index, String username, Boolean swopFlag)
-            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash {
+            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
         mapIndex.get(index).removeStudent(courseCode, username, swopFlag);
         return;
     }

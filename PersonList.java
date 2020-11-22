@@ -23,6 +23,7 @@ public class PersonList {
         // Student(username, name, matric, gender, nationality)
 
         plist = new HashMap<String, Person>();
+        new PasswordHash();
         newStudent("TestStudent1", "Test Student 1", "U1234567890", 'M', "Singaporean", "Comp Sci", 1,
                 "studentcz2002ss1@gmail.com");
         newStudent("TestStudent2", "Test Student 2", "U2345678901", 'F', "Singaporean", "Comp Sci", 2,

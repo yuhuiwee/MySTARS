@@ -9,7 +9,6 @@ public class PasswordHash {
 
     public PasswordHash() throws UserAlreadyExists {
         userpassword = new HashMap<String, String>();
-        
     }
 
     public static void saveHashMap() {
@@ -41,13 +40,11 @@ public class PasswordHash {
             fis.close();
         } catch (IOException ioe) {
             // ioe.printStackTrace();
-            new PasswordHash(); // If file not found, create default values
-            saveHashMap();
+            new PersonList();
         } catch (ClassNotFoundException c) {
             // System.out.println("Class not found");
             // c.printStackTrace();
-            new PasswordHash();
-            saveHashMap();
+            new PersonList();
         }
     }
 
@@ -64,8 +61,8 @@ public class PasswordHash {
     }
 
     public static void addUserPwd(String username, String pwd) throws UserAlreadyExists {
-        if (userpassword != null & userpassword.containsKey(username.toLowerCase())) {
-            throw new UserAlreadyExists("Username already taken!");
+        if (userpassword == null){
+            loadHashMap();
         }
 
         userpassword.put(username.toLowerCase(), SCryptUtil.scrypt(pwd, 16, 16, 16));

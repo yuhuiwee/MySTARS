@@ -1,6 +1,4 @@
-import java.io.Serializable;
-
-public class Admin extends Person implements Serializable {
+public class Admin extends Person{
     /**
      *
      */
@@ -9,9 +7,9 @@ public class Admin extends Person implements Serializable {
 
     public Admin(String username, String name, String id, char gender, String nationality, String school,
             String position, String email) throws UserAlreadyExists {
-        super(username.toLowerCase(), name.toLowerCase(), id.toLowerCase(), Character.toUpperCase(gender), nationality.toLowerCase(), school.toLowerCase(), email.toLowerCase());
+        super(username.toUpperCase(), name.toUpperCase(), id.toUpperCase(), Character.toUpperCase(gender), nationality.toUpperCase(), school.toUpperCase(), email.toUpperCase());
         this.position = position;
-        PasswordHash.addUserPwd(username, matricnum.toUpperCase());
+        PasswordHash.addUserPwd(username, username.toUpperCase());
     }
 
     public void setPosition(String position) {

@@ -1,8 +1,13 @@
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class Timetable {
+public class Timetable implements Serializable, Cloneable{
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private ArrayList<Integer> timeSlotSerialNumber;
     private TreeMap<Integer, ArrayList<String>> timeSlotInformation;// startSerial : <endSerial, coursecode, indexnum,
                                                                     // classtype, venue>

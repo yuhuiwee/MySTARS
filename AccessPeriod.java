@@ -64,6 +64,9 @@ public class AccessPeriod implements Serializable {
     }
 
     public static boolean checkAccessPeriod(Student stu) {
+        if(majoracc == null){
+            loadAccessPeriod();
+        }
         AccessPeriod st = stu.getAccessPeriod();
         ZonedDateTime current = ZonedDateTime.now();
 
@@ -118,6 +121,9 @@ public class AccessPeriod implements Serializable {
      */
 
     public static void printAllAccess() {
+        if(majoracc==null){
+            loadAccessPeriod();
+        }
         for (Map.Entry<String, ArrayList<ZonedDateTime>> entry : majoracc.entrySet()) {
             if (entry.getKey() != "Default") { // Print all but default
                 String majy = entry.getKey();
@@ -135,14 +141,14 @@ public class AccessPeriod implements Serializable {
         System.out.println("Start Date: "
                 + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm Z").format(majoracc.get("Default").get(0)));
         System.out.println("Start Date: "
-                + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm Z").format(majoracc.get("Default").get(0)));
+                + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm Z").format(majoracc.get("Default").get(1)));
         return;
 
     }
 
     public static void changeMajorAccess(String major, int year, ZonedDateTime start, ZonedDateTime end) {
         // Use for both adding and editing major access
-        String key = String.join(",", major.toLowerCase(), String.valueOf(year));
+        String key = String.join(",", major.toUpperCase(), String.valueOf(year));
         ArrayList<ZonedDateTime> temp = new ArrayList<ZonedDateTime>(2);
         temp.add(start);
         temp.add(end);

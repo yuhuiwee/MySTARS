@@ -1,4 +1,3 @@
-import java.io.Serializable;
 import java.util.*;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -8,7 +7,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class Student extends Person implements Serializable {
+public class Student extends Person{
     /**
      *
      */
@@ -33,16 +32,18 @@ public class Student extends Person implements Serializable {
     public Student(String user, String name, String matric, char gender, String nationality, String major, int year,
             String email) throws UserAlreadyExists {
         //public Person(String username, String name, String matric, char gender, String nationality, String school, String email)
-        super(user.toLowerCase(), name.toLowerCase(), matric.toLowerCase(), Character.toUpperCase(gender), nationality.toLowerCase(), major.toLowerCase(), email.toLowerCase());
+        super(user.toUpperCase(), name.toUpperCase(), matric.toUpperCase(), Character.toUpperCase(gender), nationality.toUpperCase(), major.toUpperCase(), email.toUpperCase());
         this.totalau = 0;
         registeredCourses = new HashMap<String, Integer>();
         waitlistCourses = new HashMap<String, Integer>();
         this.accessTime = new AccessPeriod(major, year);
         this.timetable = new Timetable();
-        electivemap = null;
+        electivemap = new HashMap<String, electiveType>();
         maxau = 21; // default
+        pendingSwap = new HashMap<Integer, Integer>();
+        successChange = new HashMap<String, ArrayList<Integer>>();
 
-        PasswordHash.addUserPwd(user.toLowerCase(), user.toUpperCase());
+        PasswordHash.addUserPwd(user.toUpperCase(), user.toUpperCase());
     }
 
     private electiveType intToEnum(int i) {
@@ -110,6 +111,9 @@ public class Student extends Person implements Serializable {
             waitlistCourses.put(course, index);
 
         }
+
+        PersonList.savePersonMap();
+        CourseList.saveCourseMap();
     };
 
     public void dropCourse(String course, int index) throws CourseDontExist, UserNotFound, UserAlreadyExists,
@@ -171,7 +175,7 @@ public class Student extends Person implements Serializable {
             throw new CourseAlreadyExist("You already have a pending swap with this course index!");
         }
 
-        boolean swaped = Swop.swopStudent(course, selfIndex, newIndex, username, newStudentUsername.toLowerCase());
+        boolean swaped = Swop.swopStudent(course, selfIndex, newIndex, username, newStudentUsername.toUpperCase());
         if (swaped) {// if true, swap successful
             registeredCourses.replace(course, selfIndex, newIndex);
             System.out.println("Swap successful!");
@@ -189,7 +193,8 @@ public class Student extends Person implements Serializable {
         return changeStatus;
     }
 
-    public void setSwopstatus(int index1, int index2, String course) throws TimetableClash {
+    public void setSwopstatus(int index1, int index2, String course) throws TimetableClash, CloneNotSupportedException,
+            VenueAlreadyExists {
         course = course.toUpperCase();
         String text = "Successfully swopped course " + course + " from index " + String.valueOf(index1) + " to index "
                 + String.valueOf(index2);
@@ -254,7 +259,8 @@ public class Student extends Person implements Serializable {
         pendingSwap = null;
     }
 
-    public void WaitingToRegistered(String course, int indexnum) throws TimetableClash {
+    public void WaitingToRegistered(String course, int indexnum) throws TimetableClash, CloneNotSupportedException,
+            VenueAlreadyExists {
         String text = "You have been registered for course " + course.toUpperCase() + " with index "
                 + String.valueOf(indexnum);
         sendEmail("Wait No More!", text);
@@ -338,7 +344,8 @@ public class Student extends Person implements Serializable {
         timetable.printSchedule();
     }
 
-    public boolean swapIndexCheck(int oldIndex, int newIndex) throws CloneNotSupportedException {
+    public boolean swapIndexCheck(int oldIndex, int newIndex) throws CloneNotSupportedException, TimetableClash,
+            VenueAlreadyExists {
         // to check is timetable clash before swap!
         Timetable temp = (Timetable) timetable.clone();
         temp.removeTimetable(getIndexTimetable(oldIndex));
@@ -384,7 +391,8 @@ public class Student extends Person implements Serializable {
         return electivemap.get(course.toUpperCase());
     }
 
-    private Timetable getIndexTimetable(int index) {
+    private Timetable getIndexTimetable(int index)
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         return CourseList.getIndexNum(index).getClassSchedule();
     }
 
@@ -401,9 +409,9 @@ public class Student extends Person implements Serializable {
         return t;
     }
 
-    public boolean checkRegistered(String course) throws CourseDontExist {
+    public boolean checkRegistered(String course){ //only return true if registered
         if (verifyCourse(course)==-1){
-            throw new CourseDontExist("You are not registered for this course!");
+            return false;
         }
         if (registeredCourses.containsKey(course)){
             return true;
@@ -411,8 +419,21 @@ public class Student extends Person implements Serializable {
         else if (waitlistCourses.containsKey(course)){
             return false;
         }else{
-            throw new CourseDontExist("Error!");
+            return false;
         }
+    }
+
+    public boolean checkWaitList(String course){
+        if (verifyCourse(course)==-1){
+            return false;
+        }
+        if (registeredCourses.containsKey(course)){
+            return false;
+        }
+        if (waitlistCourses.containsKey(course)){
+            return true;
+        }
+        return false;
     }
 
 }

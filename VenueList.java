@@ -14,7 +14,7 @@ public class VenueList {
             loadVenueList();
         }
         if (!checkVenue(newVenue)) { // if false
-            throw new VenueAlreadyExists("Venue already exists!");
+            return;
         }
         Timetable t = new Timetable();
         venueMap.put(newVenue.toUpperCase(), t);

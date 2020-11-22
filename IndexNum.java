@@ -42,10 +42,12 @@ public class IndexNum implements Serializable {
 
     public void setVacancy(int vacancy) {
         this.vacancy = vacancy;
+        CourseList.saveCourseMap();
     }
 
     public void setIndexNumber(int indexNumber) {
         this.indexNumber = indexNumber;
+        CourseList.saveCourseMap();
     }
 
     /* ----------- Normal Methods ----------- */
@@ -53,10 +55,12 @@ public class IndexNum implements Serializable {
     public boolean addStudent(String username) {
         // So there will be list of students available in application
         // But this will be initiated by the student class
-        if (vacancy > 0) {
+        int temp = this.vacancy;
+        if (temp > 0) {
             listOfRegisteredStudents.add(username);
-            vacancy--;
+            this.vacancy=temp-1;
             System.out.println("You have been added to the index." + this.indexNumber + ".");
+            CourseList.saveCourseMap();
             return true;
         } else {
             waitingList.add(username);
@@ -66,7 +70,7 @@ public class IndexNum implements Serializable {
     }
 
     public void removeStudent(String coursecode, String username, boolean swopFlag)
-            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash {
+            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
         // flag is for the swop to happen without adding in the students in the waiting
         // list
 
@@ -80,7 +84,7 @@ public class IndexNum implements Serializable {
         // Swop flag = True -> Just Increase vacancy without adding Students from
         // waitlist
         if (swopFlag || waitingList.isEmpty()) {
-            vacancy++;
+            setVacancy(vacancy+1);
             return;
 
         } else {// swopflag is false
@@ -108,7 +112,7 @@ public class IndexNum implements Serializable {
 
     public void printIndex() {
         System.out.println("Index Number Info: " + indexNumber);
-        System.out.println("Vacancy: " + vacancy);
+        System.out.println("Vacancy: " + this.vacancy);
     }
 
     public void printWeeklySchedule() {

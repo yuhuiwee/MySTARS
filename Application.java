@@ -46,7 +46,7 @@ public class Application {
         String coursecode;
         int indexnum;
         int index2;
-        int elec;
+        int elec, option;
         boolean check;
 
         if (st.getSwopStatus()) { // Notify student if swop is successful
@@ -55,32 +55,42 @@ public class Application {
 
         int choice = 0;
         do {
-            System.out.println("Enter one of the following options to continue");
+            System.out.println("\n\n\nEnter one of the following options to continue");
 
             System.out.print(
-                    "1. Add Course\n2. Drop Course\n3. Print Courses Registered\n4. Check Vacancies\n5. Change Course Index number\n6. Swop Index number\n7. Change Password\n8. Logout\n");
+                    "1. Add Course\n2. Drop Course\n3. Print Courses Registered\n4. Check Vacancies\n5. Change Course Index number\n6. Swop Index number\n7. Change Password\n8. Edit Elective type\n9. Print All courses\n10. Print Timetable\n11.Quit\n");
 
             choice = sc.nextInt();
+            stapp:
             switch (choice) {
                 case 1: // Add course
                     do{
                         do{
-                            System.out.print("Enter Course code: ");
+                            System.out.print("Enter Course code (Enter Q to quit): ");
                             coursecode = sc.next();
-                            
-                            if (st.checkRegistered(coursecode)){
-                                System.out.println("Error! You are already registered for this course! Please drop the course before trying again!");
-                                check = false;
+                            System.out.println(coursecode);
+                            if (coursecode.equals("q") | coursecode.equals("Q")){
+                                System.out.println("Quitting...");
+                                check = true;
+                                break stapp;
                             }
-                            else if (CourseList.checkCourseExistence(coursecode, "All")){
+                            if (!CourseList.checkCourseExistence(coursecode.toUpperCase(), "All")){
                                 System.out.println("Course does not exist!");
                                 check = false;
+                            }
+                            else if (st.checkRegistered(coursecode.toUpperCase())){
+                                System.out.println("Error! You are already registered for this course! Please drop the course before trying again!");                                
+                                check = false;
+                            }
+                            else if(st.checkWaitList(coursecode.toUpperCase())){
+                                check = false;
+                                System.out.println("Error! You are already put on waitlist for this course! Please drop the course before trying again!");
                             }
                             else{
                                 check = true;
                             }
                         }while (!check);
-                
+
                         System.out.print("Enter Index number: ");
                         indexnum = sc.nextInt();
                         if (!CourseList.checkIndex(coursecode, indexnum)){
@@ -100,14 +110,22 @@ public class Application {
                         break;
                     }
                     st.addCourse(coursecode, indexnum, elec);
+                    CourseList.saveCourseMap();
+                    CourseList.loadCourseList();
                     break;
                     
                 case 2: // Drop course
-                    System.out.print("Enter Course code: ");
-                    coursecode = sc.next();
-                    System.out.print("Enter Index number: ");
-                    indexnum = sc.nextInt();
+                    do{
+                        System.out.print("Enter Course code: ");
+                        coursecode = sc.next();
+                        indexnum = st.verifyCourse(coursecode);
+                        if (indexnum == -1){
+                            System.out.println("Error! You are not registered for this course!");
+                        }
+                    }while(indexnum==-1);
                     st.dropCourse(coursecode, indexnum);
+                    CourseList.saveCourseMap();
+                    CourseList.loadCourseList();
                     break;
                 case 3: // Print registered courses
                     System.out.println("Total AU registered: " + String.valueOf(st.getAU()));
@@ -200,20 +218,34 @@ public class Application {
                             "Enter elective type to change to:\n1. CORE\n2. Major PE\n3.GER-PE\n4. GER-UE\n5. UE");
                     elec = sc.nextInt();
                     st.swapElectiveType(coursecode, elec);
-                case 9: // Quit
-                    System.out.println("Thank you for using MySTARS!\nQuitting...");
+                case 9:
+                    CourseList.printAllCourse("All");
                     break;
-                default:
-                    System.out.println("Quitting...");
-                    //save before exiting
+                case 10:
+                    System.out.println("\n1.Print Timetable by week\n2. Print Timetable by course");
+                    option = sc.nextInt();
+                    switch(option){
+                        case 1:
+                            st.printTimeTableByWeek();
+                            break;
+                        case 2:
+                            st.printTimetableByCourse();;
+                            break;
+                    }
+                    break;
+                case 11: // Quit
+                    System.out.println("Thank you for using MySTARS!\nQuitting...");
                     CourseList.saveCourseMap();
                     PersonList.savePersonMap();
                     VenueList.saveVenueMap();
                     PasswordHash.saveHashMap();
                     AccessPeriod.saveAccessPeriod();
                     break;
+                default:
+                    System.out.println("Please enter a valid option!");
+                    break;
             }
-        } while (choice <9 & choice > 0);
+        } while (choice <11 & choice > 0);
     }
 
     private static void AdminApp(Scanner sc, Admin ad, String username, Console con)
@@ -247,8 +279,8 @@ public class Application {
                     int acc = 0;
                     do {
                         System.out.println("(1) Print all Access Period\n(2) Edit default Access Period\n"
-                                + "(3)Add new Access Period by Major/Year\n" + "(4)Remove Access Peiod for Major/Year\n"
-                                + "(5)Remove all Access Peiod by Major/Year\n" + "(6)Quit");
+                                + "(3) Add new Access Period by Major/Year\n" + "(4) Remove Access Peiod for Major/Year\n"
+                                + "(5) Remove all Access Peiod by Major/Year\n" + "(6) Quit");
                         acc = sc.nextInt();
                         switch (acc) {
                             case 1:// print all access period
@@ -341,6 +373,7 @@ public class Application {
 
                         }
                     } while (acc < 6);
+                    break;
                 case 2: // add a student
                     check = true;
                     do {
@@ -663,7 +696,7 @@ public class Application {
 
     // ========= Normal Methods =========
 
-    private static ZonedDateTime inputDateTime(Scanner sc, int minyear, int minmonth, int minday, int minhour,
+    private static ZonedDateTime inputDateTime(Scanner sc, int minYear, int minMonth, int minDay, int minhour,
             int minmin) {
         boolean mindate;
         String datestring = "";
@@ -671,7 +704,7 @@ public class Application {
         System.out.println("Enter Date: ");
         System.out.print("\nYear (yyyy): ");
         int yyyy = sc.nextInt();
-        while (yyyy < minyear) { // if admin enters year < current year
+        while (yyyy < minYear) { // if admin enters year < current year
             System.out.println("Error! Please re-enter!\nYear (yyyy): ");
             yyyy = sc.nextInt();
         }
@@ -679,7 +712,7 @@ public class Application {
         // Get Month
         System.out.print("\nMonth(mm): ");
         int mm = sc.nextInt();
-        while (mm > 12 && (mm < minmonth & minyear == yyyy)) {
+        while (mm > 12 && (mm < minMonth & minYear == yyyy)) {
             // check if month is > 12
             // if current year entered, check if month is < current month
             System.out.println("Error! Please re-enter!");
@@ -696,7 +729,7 @@ public class Application {
         YearMonth yearMonthObject = YearMonth.of(yyyy, mm);
         int daysInMonth = yearMonthObject.lengthOfMonth();
 
-        while (dd > daysInMonth && (dd < minday & mm == minmonth & minyear == yyyy)) {
+        while (dd > daysInMonth && (dd < minDay & mm == minMonth & minYear == yyyy)) {
             // check if month > max days in month entered
             // check if day entered is before the current date
             System.out.println("Error! Please re-enter!");
@@ -706,7 +739,7 @@ public class Application {
 
         datestring = datestring + "-" + String.format("%02d", dd);
 
-        if (dd == minday & mm == minmonth & yyyy == minyear) {
+        if (dd == minDay & mm == minMonth & yyyy == minYear) {
             mindate = true;
         } else {
             mindate = false;
@@ -766,7 +799,7 @@ public class Application {
             dt = ZonedDateTime.parse(datestring);
         } catch (DateTimeException e) {
             System.out.println("Error!");
-            dt = inputDateTime(sc, minyear, minmonth, minday, minhour, minmin);
+            dt = inputDateTime(sc, minYear, minMonth, minDay, minhour, minmin);
         }
 
         return dt;
