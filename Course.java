@@ -45,14 +45,9 @@ public class Course implements Serializable {
         return school;
     }
 
-    public int[] getIndexNumber() {
-        int j = 0;
-        int[] k = new int[mapIndex.size()];
-        for (Integer i : mapIndex.keySet()) {
-            k[j] = i;
-            j++;
-        }
-        return k;
+    public ArrayList<Integer> getIndexNumber() {
+        ArrayList<Integer> listOfIndex = new ArrayList<Integer>(mapIndex.keySet());
+        return listOfIndex;
     }
 
     public int getAU() {
@@ -84,27 +79,11 @@ public class Course implements Serializable {
         return bool;
     }
 
-    public void dropCourse(int index, String username, Boolean swopFlag) throws UserNotFound, UserAlreadyExists {
+    public void dropCourse(int index, String username, Boolean swopFlag)
+            throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash {
         mapIndex.get(index).removeStudent(courseCode, username, swopFlag);
-        // return;
-        // listOfRegisteredStudents.remove(username); // then how to account for people
-        // added from waitlist?
+        return;
     }
-
-    public void updateCourseCode(String currentCourseCode, String newCourseCode) {
-        // FIXME: Is the handling of updating enough in the course list.
-        // TODO: How to find the course that they want to update
-    }
-    // Since Admin can add/update course, we have to include all the mutator methods
-    // of course. But since
-    // they can only change these 2 variables, we don't include the rest of the
-    // variables.
-
-    /*
-     * public int[] getCourseIndexVacancy() { for (Integer i : mapIndex.keySet())
-     * return new int[] { i, mapIndex.get(i).getVacancy() }; }
-     */
-
     public int getIndexVacancy(int indexNum) {
         return mapIndex.get(indexNum).getVacancy();
     }
@@ -139,13 +118,22 @@ public class Course implements Serializable {
         }
     }
 
-    // public void printStudentListOfCourse() {
-    // System.out.println("\nStudent list of Course " + courseCode + ":\n");
-    // for (int i = 0; i < mapIndex.size(); i++) {
-    // // TO DO: LINK TO STUDENT CLASS TO OBTAIN NAME, GENDER AND NATIONALITY
-    // mapIndex.get(i).printStudentListOfIndex();
-    // //System.out.println((i + 1) + ") " + listOfRegisteredStudents.get(i));
-    // }
-    // }
+    public void removeCourse() throws UserNotFound, UserAlreadyExists, CourseDontExist, CloneNotSupportedException,
+            TimetableClash, VenueAlreadyExists {
+        for (Map.Entry<Integer, IndexNum> entry: mapIndex.entrySet()){
+            IndexNum ind = entry.getValue();
+            ind.deleteIndexNum(courseCode);
+        }
+        mapIndex = null;
+        return;
+    }
+    public void printAllIndex(){
+        System.out.println("Course: "+courseCode);
+        ArrayList<Integer> a = getIndexNumber();
+        ListIterator<Integer> i = a.listIterator();
+        while (i.hasNext()){
+            System.out.println("\t"+String.valueOf(i.next()));
+        }
+    }
 
 }

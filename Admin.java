@@ -8,15 +8,10 @@ public class Admin extends Person implements Serializable {
     private String position;
 
     public Admin(String username, String name, String id, char gender, String nationality, String school,
-            String position, String email) {
-        this.username = username;
-        this.name = name;
-        this.matricnum = id;
-        this.gender = gender;
-        this.nationality = nationality;
-        this.school = school;
+            String position, String email) throws UserAlreadyExists {
+        super(username.toLowerCase(), name.toLowerCase(), id.toLowerCase(), Character.toUpperCase(gender), nationality.toLowerCase(), school.toLowerCase(), email.toLowerCase());
         this.position = position;
-        this.email = email;
+        PasswordHash.addUserPwd(username, matricnum.toUpperCase());
     }
 
     public void setPosition(String position) {
@@ -25,5 +20,16 @@ public class Admin extends Person implements Serializable {
 
     public String getPosition() {
         return position;
+    }
+
+    public void printAdminDetails(){
+        System.out.println("\tName: "+this.name);
+        System.out.println("\tID: "+this.matricnum);
+        System.out.println("\tGender: "+String.valueOf(gender));
+        System.out.println("\tNationality: "+this.nationality);
+        System.out.println("\tSchool/Department: "+this.school);
+        System.out.println("\tPosition: "+this.position);
+        System.out.println("\tEmail: " + this.email);
+
     }
 }

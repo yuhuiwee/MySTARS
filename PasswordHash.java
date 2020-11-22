@@ -9,28 +9,10 @@ public class PasswordHash {
 
     public PasswordHash() throws UserAlreadyExists {
         userpassword = new HashMap<String, String>();
-        addUserPwd("TestStudent1", "Password123");
-        addUserPwd("TestStudent2", "Password123");
-        addUserPwd("TestStudent3", "Password123");
-        addUserPwd("TestStudent4", "Password123");
-        addUserPwd("TestStudent5", "Password123");
-        addUserPwd("TestStudent6", "Password123");
-        addUserPwd("TestStudent7", "Password123");
-        addUserPwd("TestStudent8", "Password123");
-        addUserPwd("TestStudent9", "Password123");
-        addUserPwd("TestStudent10", "Password123");
-        addUserPwd("TestStudent11", "Password123");
-        addUserPwd("TestStudent12", "Password123");
-        addUserPwd("TestStudent13", "Password123");
-        addUserPwd("TestStudent14", "Password123");
-        addUserPwd("TestStudent15", "Password123");
-        addUserPwd("Admin1", "Password123");
-        addUserPwd("Admin2", "Password123");
-
-        saveHashMap();
+        
     }
 
-    private static void saveHashMap() {
+    public static void saveHashMap() {
         try {
             FileOutputStream fos = new FileOutputStream("HashedPwd.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);

@@ -31,15 +31,9 @@ public class Student extends Person implements Serializable {
     private int maxau;
 
     public Student(String user, String name, String matric, char gender, String nationality, String major, int year,
-            String email) {
-        this.username = user.toLowerCase();
-        this.name = name.toLowerCase();
-        this.matricnum = matric.toLowerCase();
-        this.gender = Character.toUpperCase(gender);
-        this.nationality = nationality.toLowerCase();
-        this.school = major.toLowerCase();
-        this.year = year;
-        this.email = email.toLowerCase();
+            String email) throws UserAlreadyExists {
+        //public Person(String username, String name, String matric, char gender, String nationality, String school, String email)
+        super(user.toLowerCase(), name.toLowerCase(), matric.toLowerCase(), Character.toUpperCase(gender), nationality.toLowerCase(), major.toLowerCase(), email.toLowerCase());
         this.totalau = 0;
         registeredCourses = new HashMap<String, Integer>();
         waitlistCourses = new HashMap<String, Integer>();
@@ -47,6 +41,8 @@ public class Student extends Person implements Serializable {
         this.timetable = new Timetable();
         electivemap = null;
         maxau = 21; // default
+
+        PasswordHash.addUserPwd(user.toLowerCase(), user.toUpperCase());
     }
 
     private electiveType intToEnum(int i) {
@@ -93,7 +89,8 @@ public class Student extends Person implements Serializable {
         this.year = year;
     }
 
-    public void addCourse(String course, int index, int elec) throws CourseDontExist, TimetableClash {
+    public void addCourse(String course, int index, int elec) throws CourseDontExist, TimetableClash,
+            CloneNotSupportedException, VenueAlreadyExists {
         if (!CourseList.checkIndex(course, index)) {
             throw new CourseDontExist("Error! Course/Index does not match!");
         }
@@ -115,7 +112,8 @@ public class Student extends Person implements Serializable {
         }
     };
 
-    public void dropCourse(String course, int index) throws CourseDontExist, UserNotFound, UserAlreadyExists {
+    public void dropCourse(String course, int index) throws CourseDontExist, UserNotFound, UserAlreadyExists,
+            CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
         course = course.toUpperCase();
         int verify = verifyCourse(course);
         if (verify == -1) {
@@ -155,7 +153,8 @@ public class Student extends Person implements Serializable {
     }
 
     public void swopIndex(String course, int selfIndex, int newIndex, String newStudentUsername) throws UserNotFound,
-            UserAlreadyExists, CourseDontExist, CourseAlreadyExist, TimetableClash, CloneNotSupportedException {
+            UserAlreadyExists, CourseDontExist, CourseAlreadyExist, TimetableClash, CloneNotSupportedException,
+            VenueAlreadyExists {
         course = course.toUpperCase();
         int verify = verifyCourse(course);
         if (verify == -1) {
@@ -237,7 +236,8 @@ public class Student extends Person implements Serializable {
         return this.accessTime;
     }
 
-    public void dropAllCourse() throws CourseDontExist, UserNotFound, UserAlreadyExists {
+    public void dropAllCourse() throws CourseDontExist, UserNotFound, UserAlreadyExists, CloneNotSupportedException,
+            TimetableClash, VenueAlreadyExists {
         for (Map.Entry<String, Integer> entry : registeredCourses.entrySet()) {
             dropCourse(entry.getKey(), entry.getValue()); // also remove in pending swop
         }
@@ -399,6 +399,20 @@ public class Student extends Person implements Serializable {
             t = getTimetable();
         }
         return t;
+    }
+
+    public boolean checkRegistered(String course) throws CourseDontExist {
+        if (verifyCourse(course)==-1){
+            throw new CourseDontExist("You are not registered for this course!");
+        }
+        if (registeredCourses.containsKey(course)){
+            return true;
+        }
+        else if (waitlistCourses.containsKey(course)){
+            return false;
+        }else{
+            throw new CourseDontExist("Error!");
+        }
     }
 
 }

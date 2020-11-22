@@ -145,7 +145,8 @@ public class PersonList {
 
     }
 
-    public static void removeStudent(String username) throws UserNotFound, UserAlreadyExists, CourseDontExist {
+    public static void removeStudent(String username) throws UserNotFound, UserAlreadyExists, CourseDontExist,
+            CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
         if (plist == null) {
             loadPersonList();
         }
@@ -218,7 +219,7 @@ public class PersonList {
         if (plist.containsKey(username.toLowerCase())) {
             return true;
         } else {
-            return false;
+            return false; //false if  not used
         }
     }
 

@@ -33,7 +33,7 @@ public class Timetable {
             weekType = "Even";
         }
 
-        System.out.println("\n\tClass Type: " + a.get(3));
+        System.out.println("\tClass Type: " + a.get(3));
         System.out.println("\tWeek Type: " + weekType);
         System.out.println("\tDay of the Week: " + DayOfWeek.of(day));
         System.out.println("\tTimeslot: " + startSerial + " - " + a.get(0));
@@ -69,15 +69,27 @@ public class Timetable {
         for (int i = 1; i <= 5; i++) {
             NavigableMap<Integer, ArrayList<String>> temptree = new TreeMap<Integer, ArrayList<String>>();
             temptree = map.headMap((i + 1) * 100000, false);// get all courses for that day
-            if (temptree != null) {
+            if (temptree != null) { // if temp tree == null, means no lessons for that day
                 System.out.println(DayOfWeek.of(i) + ": ");
                 for (Entry<Integer, ArrayList<String>> entry : temptree.entrySet()) {
                     // endSerial[0], coursecode[1], indexnum[2], classtype[3],venue[4]
                     ArrayList<String> a = entry.getValue();
-                    System.out.println("Time: " + getTimefromSerial(entry.getKey()) + " - "
+
+                    if (a.get(3)=="LECTURE" | a.get(3).toLowerCase() == "LEC"){
+                        System.out.println("\tTime: " + getTimefromSerial(entry.getKey()) + " - "
                             + getTimefromSerial(Integer.parseInt(a.get(0))));
-                    System.out.println("Course: " + a.get(1) + ", Index: " + a.get(2));
-                    System.out.println("Venue: " + a.get(4));
+                        System.out.println("\tCourse: " + a.get(1)); //dont print index when its lecture classtype
+                        System.out.println("\tClass Type: "+a.get(3));
+                        System.out.println("\tVenue: " + a.get(4));
+                        System.out.println();
+                    }
+                    else{//if not lecture type
+                        System.out.println("Time: " + getTimefromSerial(entry.getKey()) + " - "
+                                + getTimefromSerial(Integer.parseInt(a.get(0))));
+                        System.out.println("Course: " + a.get(1) + ", Index: " + a.get(2));
+                        System.out.println("\tClass Type: "+a.get(3));
+                        System.out.println("Venue: " + a.get(4));
+                    }
                 }
             }
         }
@@ -122,6 +134,32 @@ public class Timetable {
         timeSlotInformation.entrySet().removeAll(t.getTimeSlotInformation().entrySet());
     }
 
+    public void removeClass(int startSerial, int endSerial){
+        timeSlotInformation.remove(startSerial);
+
+        while (startSerial!=endSerial){
+            if (startSerial%10 == 2){
+                if (timeSlotSerialNumber.contains(startSerial - 1)){
+                    timeSlotSerialNumber.remove(startSerial - 1);
+                    timeSlotSerialNumber.remove(startSerial - 2);
+                }
+            }
+            else{
+                if(timeSlotSerialNumber.contains(startSerial)){
+                    timeSlotSerialNumber.remove(startSerial);
+                }
+            }
+
+            startSerial = startSerial + 300;
+            if (startSerial%1000 >= 600){
+                startSerial = startSerial + 400;
+            }
+
+        }
+    }
+
+
+
     public void addClass(int startSerial, int endSerial, String courseCode, int index, String courseType, String venue)
             throws TimetableClash {
         // endSerial[0], coursecode[1], indexnum[2], classtype[3],venue[4]
@@ -149,10 +187,11 @@ public class Timetable {
             }
             startSerial = startSerial + 300; // Account for every half an hour interval (0800 - 0900 = Serial Code:
                                              // 108000 & 108300)
-            if (startSerial % 1000 == 600) { // If it reaches 0860, we make it 0900.
+            if (startSerial % 1000 >= 600) { // If it reaches 0860, we make it 0900.
                 startSerial = startSerial + 400;
             }
         }
+        
 
         return;
     }

@@ -65,7 +65,6 @@ public class IndexNum implements Serializable {
         }
     }
 
-    // TODO: Edited method input variables... please change in class diag
     public void removeStudent(String coursecode, String username, boolean swopFlag)
             throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash {
         // flag is for the swop to happen without adding in the students in the waiting
@@ -131,5 +130,46 @@ public class IndexNum implements Serializable {
             System.out.println(
                     "\t" + String.valueOf(n++) + ") " + name + String.valueOf(s.getGender()) + s.getNationality());
         }
+    }
+
+    public void deleteIndexNum(String courseCode) throws UserNotFound, UserAlreadyExists, CourseDontExist,
+            CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
+        if (!listOfRegisteredStudents.isEmpty()){
+            ListIterator<String> i = listOfRegisteredStudents.listIterator();
+
+            //remove registeration for all students
+            while (i.hasNext()){ 
+                String name = i.next();
+                Student s = (Student) PersonList.getByUsername(name);
+                s.dropCourse(courseCode, indexNumber);
+                String text = "Dear "+name+"\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been de-registered from this course.";
+                s.sendEmail("Course has been removed", text);
+            }
+            
+        }
+
+        //remove waiting list
+        if (!waitingList.isEmpty()){
+            ListIterator<String> i = waitingList.listIterator();
+
+            //remove registeration for all students
+            while (i.hasNext()){ 
+                String name = i.next();
+                Student s = (Student) PersonList.getByUsername(name);
+                s.dropCourse(courseCode, indexNumber);
+                String text = "Dear "+name+"\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been removed from the waiting list of this course.";
+                s.sendEmail("Course has been removed", text);
+            }
+        }
+
+        VenueList.removetimetable(classSchedule);
+        classSchedule = null;
+        listOfRegisteredStudents = null;
+        waitingList = null;
+        return;
+    }
+
+    public ArrayList<String> getWaitList(){
+        return waitingList;
     }
 }

@@ -44,7 +44,8 @@ public class Swop {
     }
 
     public static boolean swopStudent(String course, int index1, int index2, String student1, String student2)
-            throws UserNotFound, UserAlreadyExists, CourseDontExist {
+            throws UserNotFound, UserAlreadyExists, CourseDontExist, CloneNotSupportedException, TimetableClash,
+            VenueAlreadyExists {
         String k;
         if (student1.compareTo(student2) > 0) {
             k = student1 + ":" + student2;

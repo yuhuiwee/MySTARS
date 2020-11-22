@@ -1,4 +1,4 @@
-public abstract class Person {
+public class Person {
      protected String username;
      protected String name;
      protected String matricnum;
@@ -7,6 +7,15 @@ public abstract class Person {
      protected String school;
      protected String email;
 
+     public Person(String username, String name, String matric, char gender, String nationality, String school, String email){
+          this.username = username;
+          this.name = name;
+          this.matricnum = matric; 
+          this.gender = gender;
+          this.nationality = nationality;
+          this.school = school;
+          this.email = email;
+     }
      public void setUsername(String username) {
           this.username = username.toLowerCase();
      }

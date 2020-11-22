@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.*;
 
 public class VenueList {
@@ -9,19 +10,30 @@ public class VenueList {
     }
 
     public static void newVenue(String newVenue) throws VenueAlreadyExists {
+        if (venueMap==null){
+            loadVenueList();
+        }
         if (!checkVenue(newVenue)) { // if false
             throw new VenueAlreadyExists("Venue already exists!");
         }
         Timetable t = new Timetable();
-        venueMap.put(newVenue, t);
+        venueMap.put(newVenue.toUpperCase(), t);
+        saveVenueMap();
+
     }
 
     public static Timetable getTimetable(String venue) {
-        return venueMap.get(venue);
+        if (venueMap==null){
+            loadVenueList();
+        }
+        return venueMap.get(venue.toUpperCase());
     }
 
     public static boolean checkVenue(String venue) {
-        if (venueMap.containsKey(venue)) {
+        if (venueMap==null){
+            loadVenueList();
+        }
+        if (venueMap.containsKey(venue.toUpperCase())) {
             return true;
         } else {
             return false;
@@ -30,10 +42,16 @@ public class VenueList {
     }
 
     public static Timetable getVenueTimetable(String venue) {
-        return venueMap.get(venue);
+        if (venueMap==null){
+            loadVenueList();
+        }
+        return venueMap.get(venue.toUpperCase());
     }
 
     public static void printAllVenues() {
+        if (venueMap==null){
+            loadVenueList();
+        }
         if (venueMap.isEmpty()) {
             System.out.println("\tSorry, there are no venues stored in our database!");
             return;
@@ -48,8 +66,63 @@ public class VenueList {
     }
 
     public static void updateTimetable(String venue, Timetable t) {
-        venueMap.replace(venue, t);
+        if (venueMap==null){
+            loadVenueList();
+        }
+        venueMap.replace(venue.toUpperCase(), t);
+        saveVenueMap();
         return;
+    }
+
+    public static void removetimetable(Timetable t){
+        if (venueMap==null){
+            loadVenueList();
+        }
+        TreeMap<Integer, ArrayList<String>> map = t.getTimeSlotInformation();
+
+        for (Map.Entry<Integer, ArrayList<String>> entry : map.entrySet()){
+            ArrayList<String> a = entry.getValue();
+            String venue = a.get(4);
+            //get venue timetable
+            Timetable temp = getTimetable(venue);
+            //remove class from venue timetable
+            temp.removeClass(entry.getKey(), Integer.parseInt(a.get(0)));
+
+        }
+        saveVenueMap();
+    }
+
+    public static void saveVenueMap() {
+		try {
+			FileOutputStream fos = new FileOutputStream("VenueMap.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(venueMap);
+			oos.close();
+			fos.close();
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+			return;
+		}
+	}
+    @SuppressWarnings("unchecked")
+	public static void loadVenueList() {
+		try {
+			FileInputStream fis = new FileInputStream("VenueMap.ser");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			Object temp = ois.readObject();
+			if (temp instanceof HashMap<?, ?>) {
+				venueMap = (HashMap<String,Timetable>) temp;
+			}
+			ois.close();
+			fis.close();
+		} catch (IOException ioe) {
+            // ioe.printStackTrace();
+            new VenueList();
+		} catch (ClassNotFoundException c) {
+			System.out.println("Class not found");
+            c.printStackTrace();
+        }
     }
 
 }
