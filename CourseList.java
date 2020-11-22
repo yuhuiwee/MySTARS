@@ -5,7 +5,6 @@ public class CourseList {
 
 	private static HashMap<String, Course> mapCourse = null;
 	private static TreeMap<Integer, IndexNum> indexList = null; // changed this to tree map to allow printing in order
-	private static HashMap<String, ArrayList<Integer>> venueLoc;
 	private static HashMap<String, ArrayList<String>> schoolMapCourse;
 	// venueLoc hashmap is used to keep track of the vacancy of each venue. So
 	// each venue has its own timetable. The timeslot will be represented as serial
@@ -29,16 +28,20 @@ public class CourseList {
 		schoolMapCourse.put("Engineering", new ArrayList<String>(Arrays.asList("CZ2002")));
 		schoolMapCourse.put("Philosophy", new ArrayList<String>(Arrays.asList("PH2018")));
 
+		// Create new course
 		Course c1 = new Course("CZ2001", "Computer Science");
 		Course c2 = new Course("CZ2002", "Engineering");
 		Course c3 = new Course("PH2018", "Philosophy");
 
+		// Saving course in HashMap
 		mapCourse.put("CZ2001", c1);
 		mapCourse.put("CZ2002", c2);
 		mapCourse.put("PH2018", c3);
 
+		// Instantiate new indexlist
 		indexList = new TreeMap<Integer, IndexNum>();
 
+		// Create IndexNum Objects
 		IndexNum i1 = new IndexNum(1024, 10);
 		IndexNum i2 = new IndexNum(1025, 2);
 		IndexNum i3 = new IndexNum(1026, 10);
@@ -46,60 +49,97 @@ public class CourseList {
 		IndexNum i5 = new IndexNum(1028, 10);
 		IndexNum i6 = new IndexNum(1029, 10);
 
-		venueLoc = new HashMap<String, ArrayList<Integer>>();
-		venueLoc.put("LT1A", new ArrayList<Integer>());
-		venueLoc.put("LT2A", new ArrayList<Integer>());
-		venueLoc.put("TR1", new ArrayList<Integer>());
-		venueLoc.put("SWLAB", new ArrayList<Integer>());
+		// Create HashMap to put index for each course
+		HashMap<Integer, IndexNum> cz2001 = new HashMap<Integer, IndexNum>();
+		cz2001.put(1024, i1);
+		cz2001.put(1025, i2);
 
-		Timetable sc1 = new Timetable("Lecture", "Normal", "Monday", 1000, 1200, "LT2A");
-		Timetable sc2 = new Timetable("Tutorial", "Normal", "Tuesday", 1000, 1200, "TR1");
-		Timetable sc3 = new Timetable("Tutorial", "Normal", "Monday", 1300, 1400, "TR1");
-		Timetable sc4 = new Timetable("Lecture", "Normal", "Wednesday", 1100, 1300, "LT2A");
-		Timetable sc5 = new Timetable("Lecture", "Normal", "Wednesday", 1100, 1300, "LT1A");
-		Timetable sc6 = new Timetable("Laboratory Session", "Odd", "Tuesday", 1000, 1200, "SWLAB");
-		Timetable sc7 = new Timetable("Laboratory Session", "Even", "Tuesday", 1000, 1200, "SWLAB");
+		HashMap<Integer, IndexNum> cz2002 = new HashMap<Integer, IndexNum>();
+		cz2002.put(1026, i3);
+		cz2002.put(1027, i4);
 
-		venueLoc.get("LT2A").add(110001);
-		venueLoc.get("LT2A").add(110301);
-		venueLoc.get("LT2A").add(111001);
-		venueLoc.get("LT2A").add(111301); // The serial number added in half an hour interval (1000 - 1200) for LT2A
-											// Note that serial number 112001 is not added here as that would mean the
-											// class ends at 1230
-		venueLoc.get("TR1").add(210001);
-		venueLoc.get("TR1").add(210301);
-		venueLoc.get("TR1").add(211001);
-		venueLoc.get("TR1").add(211301); // sc2
+		HashMap<Integer, IndexNum> ph2018 = new HashMap<Integer, IndexNum>();
+		ph2018.put(1028, i5);
+		ph2018.put(1029, i6);
 
-		venueLoc.get("TR1").add(113001);
-		venueLoc.get("TR1").add(113301); // sc3
+		// Save index number map to indexlist
+		newIndexNumbers(cz2001);
+		newIndexNumbers(cz2002);
+		newIndexNumbers(ph2018);
+		// Save HashMap in Course Object
+		c1.setIndexNumber(cz2001);
+		c2.setIndexNumber(cz2002);
+		c2.setIndexNumber(ph2018);
 
-		venueLoc.get("LT2A").add(311001);
-		venueLoc.get("LT2A").add(311301);
-		venueLoc.get("LT2A").add(312001);
-		venueLoc.get("LT2A").add(312301); // sc4
+		// Creating and instantiating new venues
+		VenueList.newVenue("LT1A");
+		VenueList.newVenue("LT2A");
+		VenueList.newVenue("TR1");
+		VenueList.newVenue("SWLAB");
 
-		venueLoc.get("LT1A").add(311001);
-		venueLoc.get("LT1A").add(311301);
-		venueLoc.get("LT1A").add(312001);
-		venueLoc.get("LT1A").add(312301); // sc5
+		// Intiantiate timetable
+		Timetable sc1 = new Timetable();
+		Timetable sc2 = new Timetable();
+		Timetable sc3 = new Timetable();
+		Timetable sc4 = new Timetable();
+		Timetable sc5 = new Timetable();
+		Timetable sc6 = new Timetable();
+		Timetable sc7 = new Timetable();
 
-		venueLoc.get("SWLAB").add(210002);
-		venueLoc.get("SWLAB").add(210302);
-		venueLoc.get("SWLAB").add(211002);
-		venueLoc.get("SWLAB").add(211302); // sc6
+		// Add Schedule to timetable with placeholder index
+		sc1.addClass(110002, 112002, "CZ2001", -1, "Lecture", "LT2A");
+		sc2.addClass(210002, 212002, "CZ2001", -1, "Tutorial", "TR1");
+		sc3.addClass(213002, 214002, "CZ2001", -1, "Tutorial", "TR1");
+		sc4.addClass(311002, 313002, "CZ2002", -1, "Lecture", "LT2A");
+		sc5.addClass(311002, 313002, "PH2018", -1, "Lecture", "LT1A");
+		sc6.addClass(210001, 212001, "CZ2002", -1, "Lab", "SWLAB");
+		sc7.addClass(210002, 212002, "CZ2002", -1, "Lab", "SWLAB");
 
-		venueLoc.get("SWLAB").add(210003);
-		venueLoc.get("SWLAB").add(210303);
-		venueLoc.get("SWLAB").add(211003);
-		venueLoc.get("SWLAB").add(211303); // sc7
+		// Add timetable clone to index
+		Timetable temp = new Timetable();
+		temp = (Timetable) sc1.clone();
+		temp.editIndex(1024);
+		i1.addClassSchedule(temp);
+		VenueList.updateTimetable("LT2A", temp);
 
-		indexList.put(1024, i1);
-		indexList.put(1025, i2);
-		indexList.put(1026, i3);
-		indexList.put(1027, i4);
-		indexList.put(1028, i5);
-		indexList.put(1029, i6);
+		temp = (Timetable) sc2.clone();
+		temp.editIndex(1024);
+		i1.addClassSchedule(sc2.clone());
+		VenueList.updateTimetable("TR1", temp);
+
+		temp = (Timetable) sc1.clone();
+		temp.editIndex(1025);
+		i2.addClassSchedule(sc1.clone());
+		VenueList.updateTimetable("LT2A", temp);
+
+		temp = (Timetable) sc3.clone();
+		temp.editIndex(1025);
+		i2.addClassSchedule(sc3.clone());
+		VenueList.updateTimetable("TR1", temp);
+
+		temp = (Timetable) sc4.clone();
+		temp.editIndex(1026);
+		i3.addClassSchedule(sc4.clone());
+
+		temp = (Timetable) sc6.clone();
+		temp.editIndex(1026);
+		i3.addClassSchedule(sc6.clone());
+
+		temp = (Timetable) sc4.clone();
+		temp.editIndex(1027);
+		i4.addClassSchedule(sc4.clone());
+
+		temp = (Timetable) sc7.clone();
+		temp.editIndex(1027);
+		i4.addClassSchedule(sc7.clone());
+
+		temp = (Timetable) sc5.clone();
+		temp.editIndex(1028);
+		i5.addClassSchedule(sc5.clone());
+
+		temp = (Timetable) sc5.clone();
+		temp.editIndex(1028);
+		i6.addClassSchedule(sc5.clone());
 
 		indexList.get(1024).addSchedule(sc1);
 		indexList.get(1024).addSchedule(sc2);
@@ -309,8 +349,7 @@ public class CourseList {
 	}
 
 	// TODO: Refer to updateCourse Method in application class. We will have
-	// multiple methods to
-	// change different elements of the course. Case 2 and below
+	// multiple methods to change different elements of the course. Case 2 and below
 
 	public static boolean addCourseByStudent(String coursecode, int index, String username) throws CourseDontExist {
 		if (indexList == null | mapCourse == null) {

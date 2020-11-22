@@ -739,7 +739,7 @@ public class Application {
 
         System.out.println("You have successfully added the courses");
 
-        // TODO: For debugging purposes! Delete after debugging
+        // NOTE: For debugging purposes! Delete after debugging
         for (Map.Entry<Integer, IndexNum> entry : indexMap.entrySet()) {
             entry.getValue().printCourseSchedule();
         }
@@ -859,7 +859,7 @@ public class Application {
                 ind.addClassSchedule(t);
 
                 System.out.println("Successfully added new index num!");
-                // TODO: For debugging purposes!
+                // NOTE: For debugging purposes!
                 ind.printCourseSchedule();
                 break;
             case 5:
@@ -980,24 +980,8 @@ public class Application {
         return time;
     }
 
-    private static boolean checkTimeSlotClash(ArrayList<Integer> timetable, int startSerial, int endSerial) {
-        ListIterator<Integer> i = timetable.listIterator();
-        while (i.hasNext()) {
-            int s = i.next();
-            if (s >= startSerial & s < endSerial) {
-                if (startSerial % 10 == 2) {
-                    return false;
-                }
-                if (s % 10 == startSerial % 10) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private static Timetable getCourseDetails(Scanner sc, String courseType, String courseCode, int index)
-            throws TimetableClash, CloneNotSupportedException {
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         int serialNum, startSerial, endSerial;
         int classFreq;
         int day, time;
@@ -1048,7 +1032,8 @@ public class Application {
             t.printWeeklySchedule();
 
         } else {
-            t = new Timetable(); // So if venue don't exist, it will create new timetable?
+            VenueList.newVenue(venue);
+            t = VenueList.getTimetable(venue);
         }
 
         do {
@@ -1067,6 +1052,9 @@ public class Application {
         } while (!check);
 
         t.addClass(startSerial, endSerial, courseCode, index, courseType, venue);
+        // NOTE: Venue should technically be updated already...
+        // if it isnt, un-comment bottomline
+        // VenueList.updateTimetable(venue, t.clone());
         return t.clone(); // Return the clone of the timetable object
     }
 
