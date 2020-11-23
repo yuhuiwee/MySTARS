@@ -382,13 +382,13 @@ public class Student extends Person{
         if (verifyCourse(course.toUpperCase()) == -1) {
             return;// should not be invoked as check is doen in application class
         }
-        electivemap.replace(course.toUpperCase(), intToEnum(elec));
+        this.electivemap.replace(course.toUpperCase(), intToEnum(elec));
         return;
 
     }
 
     public electiveType getElectiveTypeCourse(String course) {
-        return electivemap.get(course.toUpperCase());
+        return this.electivemap.get(course.toUpperCase());
     }
 
     private Timetable getIndexTimetable(int index)

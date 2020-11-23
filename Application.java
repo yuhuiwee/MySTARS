@@ -136,11 +136,10 @@ public class Application {
                     coursecode = sc.next();
                     if (CourseList.checkCourseExistence(coursecode, "All")) {
                         CourseList.checkCourseVacancies(coursecode);
-                        break;
                     } else {
                         System.out.println("Error! Please enter a valid course code!");
-                        break;
                     }
+                    break;
                 case 5: // Change course index number
                     System.out.print("Enter course code: ");
                     coursecode = sc.next();
@@ -152,17 +151,15 @@ public class Application {
                     index2 = sc.nextInt();
                     if (!st.swapIndexCheck(index, index2)) {
                         System.out.println("Error! There is a time clash! You are not able to swop to this index!");
-                        break;
                     }
                     if (CourseList.getIndexNum(index2).getVacancy() > 0) {
                         elec = st.getCourseElectiveIndex(coursecode);
                         st.dropCourse(coursecode, index);
                         st.addCourse(coursecode, index2, elec);
-                        break;
                     } else {
                         System.out.println("Course index full!\n Please choose another index of swop with another student");
-                        break;
                     }
+                    break;
                 case 6: // Swop course with another student
                     do{
                         System.out.print("Enter course code: ");
@@ -212,12 +209,13 @@ public class Application {
                         throw new WrongPassword("Password do not match!");
                     }
                 case 8:// change elective type for course
-                    System.out.println("Enter the course code to change: ");
-                    coursecode = sc.nextLine();
+                    System.out.print("Enter the course code to change: ");
+                    coursecode = sc.next();
                     System.out.println(
-                            "Enter elective type to change to:\n1. CORE\n2. Major PE\n3.GER-PE\n4. GER-UE\n5. UE");
+                            "Enter elective type to change to:\n1. CORE\n2. Major PE\n3. GER-PE\n4. GER-UE\n5. UE");
                     elec = sc.nextInt();
                     st.swapElectiveType(coursecode, elec);
+                    break;
                 case 9:
                     CourseList.printAllCourse("All");
                     break;

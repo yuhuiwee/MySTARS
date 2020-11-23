@@ -56,7 +56,11 @@ public class Timetable implements Serializable, Cloneable{
         TreeMap<Integer, ArrayList<String>> evenWeek = new TreeMap<Integer, ArrayList<String>>();
 
         for (Map.Entry<Integer, ArrayList<String>> entry : timeSlotInformation.entrySet()) {
-            if (entry.getKey() % 10 == 1) {
+            if (entry.getKey()%10 ==2){
+                oddWeek.put(entry.getKey(), entry.getValue());
+                evenWeek.put(entry.getKey(), entry.getValue());
+            }
+            else if (entry.getKey() % 10 == 1) {
                 oddWeek.put(entry.getKey(), entry.getValue());
             } else {
                 evenWeek.put(entry.getKey(), entry.getValue());
@@ -65,6 +69,7 @@ public class Timetable implements Serializable, Cloneable{
 
         System.out.println("Odd Week: ");
         printWeek(oddWeek);
+        System.out.println("\n\n");
         System.out.println("Even Week");
         printWeek(evenWeek);
         return;
@@ -73,14 +78,14 @@ public class Timetable implements Serializable, Cloneable{
     private void printWeek(TreeMap<Integer, ArrayList<String>> map) {
         for (int i = 1; i <= 5; i++) {
             NavigableMap<Integer, ArrayList<String>> temptree = new TreeMap<Integer, ArrayList<String>>();
-            temptree = map.headMap((i + 1) * 100000, false);// get all courses for that day
+            temptree = map.subMap(i*100000,(i + 1) * 100000);// get all courses for that day
             if (temptree != null) { // if temp tree == null, means no lessons for that day
                 System.out.println(DayOfWeek.of(i) + ": ");
                 for (Entry<Integer, ArrayList<String>> entry : temptree.entrySet()) {
                     // endSerial[0], coursecode[1], indexnum[2], classtype[3],venue[4]
                     ArrayList<String> a = entry.getValue();
 
-                    if (a.get(3)=="LECTURE" | a.get(3).toLowerCase() == "LEC"){
+                    if (a.get(3).equals("LECTURE") | a.get(3).equals("LEC")){
                         System.out.println("\tTime: " + getTimefromSerial(entry.getKey()) + " - "
                             + getTimefromSerial(Integer.parseInt(a.get(0))));
                         System.out.println("\tCourse: " + a.get(1)); //dont print index when its lecture classtype

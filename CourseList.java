@@ -51,35 +51,6 @@ public class CourseList {
 		IndexNum i5 = new IndexNum(1028, 10);
 		IndexNum i6 = new IndexNum(1029, 10);
 
-		indexList.put(1024, i1);
-		indexList.put(1025, i2);
-		indexList.put(1026, i3);
-		indexList.put(1027, i4);
-		indexList.put(1028, i5);
-		indexList.put(1029, i6);
-
-		// Create HashMap to put index for each course (Index Number, index Number object)
-		HashMap<Integer, IndexNum> cz2001 = new HashMap<Integer, IndexNum>();
-		cz2001.put(1024, i1);
-		cz2001.put(1025, i2);
-
-		HashMap<Integer, IndexNum> cz2002 = new HashMap<Integer, IndexNum>();
-		cz2002.put(1026, i3);
-		cz2002.put(1027, i4);
-
-		HashMap<Integer, IndexNum> ph2018 = new HashMap<Integer, IndexNum>();
-		ph2018.put(1028, i5);
-		ph2018.put(1029, i6);
-
-		// Save index number map of each course to indexlist
-		newIndexNumbers(cz2001);
-		newIndexNumbers(cz2002);
-		newIndexNumbers(ph2018);
-		// Save HashMap in Course Object
-		c1.setIndexNumber(cz2001);
-		c2.setIndexNumber(cz2002);
-		c3.setIndexNumber(ph2018);
-
 		// Creating and instantiating new venues
 		VenueList.newVenue("LT1A");
 		VenueList.newVenue("LT2A");
@@ -133,7 +104,28 @@ public class CourseList {
 		i5.addClassSchedule(sc5.clone());
 		i6.addClassSchedule(sc5.clone());
 		VenueList.updateTimetable("LT1A", sc5.clone());
-		// write to ser file
+
+		// Create HashMap to put index for each course (Index Number, index Number object)
+		HashMap<Integer, IndexNum> cz2001 = new HashMap<Integer, IndexNum>();
+		cz2001.put(1024, i1);
+		cz2001.put(1025, i2);
+
+		HashMap<Integer, IndexNum> cz2002 = new HashMap<Integer, IndexNum>();
+		cz2002.put(1026, i3);
+		cz2002.put(1027, i4);
+
+		HashMap<Integer, IndexNum> ph2018 = new HashMap<Integer, IndexNum>();
+		ph2018.put(1028, i5);
+		ph2018.put(1029, i6);
+
+		// Save index number map of each course to indexlist
+		newIndexNumbers(cz2001);
+		newIndexNumbers(cz2002);
+		newIndexNumbers(ph2018);
+		// Save HashMap in Course Object
+		c1.setIndexNumber(cz2001);
+		c2.setIndexNumber(cz2002);
+		c3.setIndexNumber(ph2018);
 
 		saveCourseMap();
 	}
@@ -307,7 +299,12 @@ public class CourseList {
 
 	// ****** Method to Create a new Index Number for a Course ******
 	public static void newIndexNumbers(HashMap<Integer, IndexNum> indexmap) {
-		indexmap.putAll(indexmap);
+		//indexmap.putAll(indexmap);
+		//NOTE: Cannot use putall method cus it puts a COPY inside the hashmap.
+
+		for (Map.Entry<Integer, IndexNum> entry: indexmap.entrySet()){
+			indexList.put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	// ****** CHANGE COURSE CODE NAME (Admin) ******
