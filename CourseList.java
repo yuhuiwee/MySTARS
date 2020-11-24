@@ -1,11 +1,12 @@
+
 import java.util.*;
 import java.io.*;
 
 public class CourseList {
 
-	private static HashMap<String, Course> mapCourse = null;
-	private static TreeMap<Integer, IndexNum> indexList = null; // changed this to tree map to allow printing in order
+	private static HashMap<String, Course> mapCourse;
 	private static HashMap<String, ArrayList<String>> schoolMapCourse;
+	private static HashMap<Integer, String> indexMap;
 	// venueLoc hashmap is used to keep track of the vacancy of each venue. So
 	// each venue has its own timetable. The timeslot will be represented as serial
 	// number of integer type as
@@ -22,26 +23,23 @@ public class CourseList {
 	// ****** JUST AN INITIALIZATION WHEN PROGRAM STARTS ******
 	public CourseList() throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
 		mapCourse = new HashMap<String, Course>();
+		indexMap = new HashMap<Integer, String>();
 
 		schoolMapCourse = new HashMap<String, ArrayList<String>>();
-		schoolMapCourse.put("COMPUTER SCIENCE", new ArrayList<String>(Arrays.asList("CZ2001")));
-		schoolMapCourse.put("ENGINEERING", new ArrayList<String>(Arrays.asList("CZ2002")));
-		schoolMapCourse.put("PHILOSOPHY", new ArrayList<String>(Arrays.asList("PH2018")));
+		schoolMapCourse.put("COMPUTER SCIENCE", new ArrayList<String>());
+		schoolMapCourse.put("COMPUTER SCIENCE", new ArrayList<String>());
+		schoolMapCourse.put("PHILOSOPHY", new ArrayList<String>());
 		schoolMapCourse.put("ARTS", new ArrayList<String>());
 		schoolMapCourse.put("BUSINESS", new ArrayList<String>());
+		schoolMapCourse.get("COMPUTER SCIENCE").add("CZ2001");
+		schoolMapCourse.get("COMPUTER SCIENCE").add("CZ2002");
+		schoolMapCourse.get("PHILOSOPHY").add("PH2018");
+		
 
 		// Create new course
 		Course c1 = new Course("CZ2001", "COMPUTER SCIENCE");
 		Course c2 = new Course("CZ2002", "ENGINEERING");
 		Course c3 = new Course("PH2018", "PHILOSOPHY");
-
-		// Saving course in HashMap
-		mapCourse.put("CZ2001", c1);
-		mapCourse.put("CZ2002", c2);
-		mapCourse.put("PH2018", c3);
-
-		// Instantiate new indexlist
-		indexList = new TreeMap<Integer, IndexNum>();
 
 		// Create IndexNum Objects (Index Number, Vacancy)
 		IndexNum i1 = new IndexNum(1024, 10);
@@ -50,7 +48,8 @@ public class CourseList {
 		IndexNum i4 = new IndexNum(1027, 10);
 		IndexNum i5 = new IndexNum(1028, 10);
 		IndexNum i6 = new IndexNum(1029, 10);
-
+		
+		new VenueList();
 		// Creating and instantiating new venues
 		VenueList.newVenue("LT1A");
 		VenueList.newVenue("LT2A");
@@ -74,6 +73,16 @@ public class CourseList {
 		sc5.addClass(311002, 313002, "PH2018", -1, "Lecture", "LT1A");
 		sc6.addClass(210001, 212001, "CZ2002", 1026, "Lab", "SWLAB");
 		sc7.addClass(210002, 212002, "CZ2002", 1027, "Lab", "SWLAB");
+
+		VenueList.updateTimetable("LT2A", sc1.clone());
+		VenueList.updateTimetable("TR1", sc2.clone());
+		VenueList.updateTimetable("TR1", sc3.clone());
+		VenueList.updateTimetable("LT2A", sc4.clone());
+		VenueList.updateTimetable("LT1A", sc5.clone());
+		VenueList.updateTimetable("SWLAB", sc6.clone());
+		VenueList.updateTimetable("SWLAB", sc7.clone());
+		
+		
 
 		// Add timetable clone to index and to venue
 
@@ -117,16 +126,18 @@ public class CourseList {
 		HashMap<Integer, IndexNum> ph2018 = new HashMap<Integer, IndexNum>();
 		ph2018.put(1028, i5);
 		ph2018.put(1029, i6);
-
 		// Save index number map of each course to indexlist
-		newIndexNumbers(cz2001);
-		newIndexNumbers(cz2002);
-		newIndexNumbers(ph2018);
-		// Save HashMap in Course Object
-		c1.setIndexNumber(cz2001);
-		c2.setIndexNumber(cz2002);
-		c3.setIndexNumber(ph2018);
 
+		mapCourse.put("CZ2001", c1);
+		mapCourse.put("CZ2002", c2);
+		mapCourse.put("PH2018", c3);
+
+		newIndexNumbers(cz2001, "CZ2001");
+		newIndexNumbers(cz2002, "CZ2002");
+		newIndexNumbers(ph2018, "PH2018");
+
+		
+		VenueList.saveVenueMap();
 		saveCourseMap();
 	}
 
@@ -142,11 +153,11 @@ public class CourseList {
 			ois.close();
 			fis.close();
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			// ioe.printStackTrace();
 			new CourseList(); // If file not found, create default values
 		} catch (ClassNotFoundException c) {
-			System.out.println("Class not found");
-			c.printStackTrace();
+			// System.out.println("Class not found");
+			// c.printStackTrace();
 			new CourseList();
 		}
 
@@ -154,17 +165,35 @@ public class CourseList {
 			FileInputStream fis = new FileInputStream("IndexList.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			Object temp = ois.readObject();
-			if (temp instanceof TreeMap<?, ?>) {
-				indexList = (TreeMap<Integer, IndexNum>) temp;
+			if (temp instanceof HashMap<?, ?>) {
+				indexMap = (HashMap<Integer, String>) temp;
 			}
 			ois.close();
 			fis.close();
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			// ioe.printStackTrace();
 			new CourseList(); // If file not found, create default values
 		} catch (ClassNotFoundException c) {
-			System.out.println("Class not found");
-			c.printStackTrace();
+			// System.out.println("Class not found");
+			// c.printStackTrace();
+			new CourseList();
+		}
+
+		try {
+			FileInputStream fis = new FileInputStream("SchoolMap.ser");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			Object temp = ois.readObject();
+			if (temp instanceof HashMap<?, ?>) {
+				schoolMapCourse = (HashMap<String, ArrayList<String>>) temp;
+			}
+			ois.close();
+			fis.close();
+		} catch (IOException ioe) {
+			// ioe.printStackTrace();
+			new CourseList(); // If file not found, create default values
+		} catch (ClassNotFoundException c) {
+			// System.out.println("Class not found");
+			// c.printStackTrace();
 			new CourseList();
 		}
 	}
@@ -186,14 +215,27 @@ public class CourseList {
 		try {
 			FileOutputStream fos = new FileOutputStream("IndexList.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(indexList);
+			oos.writeObject(indexMap);
+			oos.close();
+			fos.close();
+		}
+
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+			return;
+		}
+
+		try {
+			FileOutputStream fos = new FileOutputStream("SchoolMap.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(schoolMapCourse);
 			oos.close();
 			fos.close();
 			return;
 		}
 
 		catch (IOException ioe) {
-			ioe.printStackTrace();
+			//ioe.printStackTrace();
 			return;
 		}
 	}
@@ -204,9 +246,12 @@ public class CourseList {
 																					// updating course. Other purpose
 														// will have
 	{ // school parameter default value of null
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
+		
 		int k = 0;
-		System.out.println("\nCurrent Courses available:");
+		System.out.println("\n\nCurrent Courses available:");
 		if (school.equals("All"))	//Print all course in existence
 		{
 			for(String j: mapCourse.keySet())
@@ -217,12 +262,17 @@ public class CourseList {
 		else //Print course by school
 		{
 			ArrayList<String> temp = schoolMapCourse.get(school);
-			for (int i = 0; i < temp.size(); i++) {
-				System.out.print(temp.get(i) + "\t");
-				k++;
-				if (k % 4 == 0) {
-					System.out.print("\n");
+			if (temp!=null){
+				for (int i = 0; i < temp.size(); i++) {
+					System.out.print(temp.get(i) + "\t");
+					k++;
+					if (k % 4 == 0) {
+						System.out.print("\n");
+					}
 				}
+			}
+			else{
+				System.out.println("There are no courses registered under " + school);
 			}
 		}
 		System.out.print("\n");
@@ -240,23 +290,21 @@ public class CourseList {
 
 	// ****** Method to print all Indexes in existence ******
 	public static void printAllIndex() throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		int k = 0;
-		loadCourseList();
-		System.out.println("\nCurrent Index Number available:");
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		// iterate through and get sorted index num keys
-		for (Map.Entry<Integer, IndexNum> entry : indexList.entrySet()) {
-			System.out.println(entry.getKey() + "\t");
-			k++;
-				if (k % 4 == 0) {
-					System.out.print("\n");
-				}
+		for (Map.Entry<Integer,String> entry : indexMap.entrySet()) {
+			System.out.println(entry.getKey());
 		}
 	}
 
 	// ****** Method to check course existence ******
 	public static boolean checkCourseExistence(String courseCode, String school)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		courseCode = courseCode.toUpperCase();
 		if (school.equals("All"))
 		{
@@ -276,20 +324,28 @@ public class CourseList {
 	}
 
 	// ****** Method to check index existence ******
-	public static boolean checkIndexExistence(int indexNum)
+
+	//TODO: Edited method.. check
+	public static boolean checkIndexExistence(int index)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
-		if (indexList.containsKey(indexNum))
-			return true;
-		else {
-			return false; // if does not contain
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
 		}
+		if (indexMap.containsKey(index)){
+			return true;//return true if index exists
+		}
+		else{
+			return false;
+		}
+		
 	}
 
 	// ****** Method to create new course ******
 	public static Course newCourse(String courseCode, String school)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		schoolMapCourse.get(school.toUpperCase()).add(courseCode.toUpperCase());		//Set course to school grouping
 		Course c = new Course(courseCode.toUpperCase(), school.toUpperCase());
 		mapCourse.put(courseCode.toUpperCase(), c);
@@ -298,20 +354,27 @@ public class CourseList {
 	}
 
 	// ****** Method to Create a new Index Number for a Course ******
-	public static void newIndexNumbers(HashMap<Integer, IndexNum> indexmap) {
+	public static void newIndexNumbers(HashMap<Integer, IndexNum> map, String course)
+			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
 		//indexmap.putAll(indexmap);
 		//NOTE: Cannot use putall method cus it puts a COPY inside the hashmap.
 
-		for (Map.Entry<Integer, IndexNum> entry: indexmap.entrySet()){
-			indexList.put(entry.getKey(), entry.getValue());
+		getCourse(course.toUpperCase()).setIndexNumber(map);
+
+		for (Map.Entry<Integer, IndexNum> entry : map.entrySet())
+		{
+			indexMap.put(entry.getKey(), course.toUpperCase());
 		}
+
 	}
 
 	// ****** CHANGE COURSE CODE NAME (Admin) ******
 	public static void updateCourseCode(String newCourseCode, String currentCourseCode)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
 		String school;
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		Course c = getCourse(currentCourseCode);
 		c.setcourseCode(newCourseCode);
 		school = c.getSchool();
@@ -324,11 +387,13 @@ public class CourseList {
 
 	public static boolean addCourseByStudent(String coursecode, int index, String username) throws CourseDontExist,
 			TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		coursecode = coursecode.toUpperCase();
 		if (mapCourse.containsKey(coursecode)) {
-			IndexNum ind = getIndexNum(index);
-			boolean bool = getCourse(coursecode).addCourse(ind, username);
+			Course c = getCourse(coursecode);
+			boolean bool = c.addCourse(index, username);
 			saveCourseMap();
 			return bool;
 		}
@@ -349,7 +414,9 @@ public class CourseList {
 			throws CourseDontExist, UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash,
 			VenueAlreadyExists {
 
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 
 		coursecode = coursecode.toUpperCase();
 
@@ -367,7 +434,9 @@ public class CourseList {
 	// ********** BASICALLY REMOVE COURSE **********
 	public static void dropCourseByAdmin(String coursecode) throws UserNotFound, UserAlreadyExists, CourseDontExist,
 			TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		coursecode = coursecode.toUpperCase();
 		if (!(mapCourse.containsKey(coursecode))) {
 			System.out.println("The course does not exist!\n");
@@ -384,7 +453,7 @@ public class CourseList {
 		ArrayList<Integer> indexes = c.getIndexNumber();
 		ListIterator<Integer> i = indexes.listIterator();
 		while (i.hasNext()){
-			indexList.remove(i.next());
+			indexMap.remove(i.next());
 		}
 
 		//remove all indexes
@@ -409,7 +478,9 @@ public class CourseList {
 			throws UserNotFound, UserAlreadyExists, CourseDontExist, CloneNotSupportedException, TimetableClash,
 			VenueAlreadyExists {
 
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 
 		coursecode = coursecode.toUpperCase();
 
@@ -417,8 +488,8 @@ public class CourseList {
 			Course c = mapCourse.get(coursecode);
 			c.dropCourse(index1, student1, true);
 			c.dropCourse(index2, student2, true);
-			c.addCourse(getIndexNum(index1), student2);
-			c.addCourse(getIndexNum(index2), student1);
+			c.addCourse(index1, student2);
+			c.addCourse(index2, student1);
 			saveCourseMap();
 			return;
 
@@ -445,7 +516,9 @@ public class CourseList {
 	// ****** Method to check course vacancy ******
 	public static void checkCourseVacancies(String coursecode) throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists { // For students to view the vacancy of all the index in
 																	// course
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 
 		coursecode = coursecode.toUpperCase();
 
@@ -462,7 +535,9 @@ public class CourseList {
 
 	// *********** CHECK INDEX EXISTENCE IN COURSE ***************
 	public static boolean checkIndex(String coursecode, int index) throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists{
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 
 		coursecode = coursecode.toUpperCase();
 		if (mapCourse.containsKey(coursecode)) {
@@ -477,13 +552,19 @@ public class CourseList {
 
 	public static IndexNum getIndexNum(int index)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
-		return indexList.get(index);
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
+		String coursecode = indexMap.get(index);
+		Course c = getCourse(coursecode);
+		return c.getIndexNum(index);
 	}
 
 	public static Course getCourse(String course)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-		loadCourseList();
+		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
+			loadCourseList();
+		}
 		course = course.toUpperCase();
 		return mapCourse.get(course);
 	}

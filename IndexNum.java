@@ -59,8 +59,9 @@ public class IndexNum implements Serializable {
         if (temp > 0) {
             listOfRegisteredStudents.add(username);
             this.vacancy=temp-1;
-            System.out.println("You have been added to the index." + this.indexNumber + ".");
+            System.out.println("You have been added to the index: " + this.indexNumber);
             CourseList.saveCourseMap();
+            System.out.println(getVacancy());
             return true;
         } else {
             waitingList.add(username);
@@ -73,7 +74,7 @@ public class IndexNum implements Serializable {
             throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
         // flag is for the swop to happen without adding in the students in the waiting
         // list
-
+        int temp = this.vacancy;
         if (listOfRegisteredStudents.contains(username)) {
             listOfRegisteredStudents.remove(username);
         } else {
@@ -84,10 +85,10 @@ public class IndexNum implements Serializable {
         // Swop flag = True -> Just Increase vacancy without adding Students from
         // waitlist
         if (swopFlag || waitingList.isEmpty()) {
-            setVacancy(vacancy+1);
+            this.vacancy = temp + 1;
             return;
 
-        } else {// swopflag is false
+        }else {// swopflag is false
             int i = 0;
             String user = waitingList.get(i);
             Student st = (Student) PersonList.getByUsername(user);
@@ -100,7 +101,7 @@ public class IndexNum implements Serializable {
             }
             listOfRegisteredStudents.add(user);
             st.WaitingToRegistered(coursecode, indexNumber); // inform student of swop
-            waitingList.remove(0);
+            waitingList.remove(i);
             return;
 
         }

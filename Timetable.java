@@ -67,6 +67,7 @@ public class Timetable implements Serializable, Cloneable{
             }
         }
 
+        System.out.println("\n\n");
         System.out.println("Odd Week: ");
         printWeek(oddWeek);
         System.out.println("\n\n");
@@ -77,9 +78,9 @@ public class Timetable implements Serializable, Cloneable{
 
     private void printWeek(TreeMap<Integer, ArrayList<String>> map) {
         for (int i = 1; i <= 5; i++) {
-            NavigableMap<Integer, ArrayList<String>> temptree = new TreeMap<Integer, ArrayList<String>>();
+            SortedMap<Integer, ArrayList<String>> temptree = new TreeMap<Integer, ArrayList<String>>();
             temptree = map.subMap(i*100000,(i + 1) * 100000);// get all courses for that day
-            if (temptree != null) { // if temp tree == null, means no lessons for that day
+            if (!temptree.isEmpty()) { // if temp tree == null, means no lessons for that day
                 System.out.println(DayOfWeek.of(i) + ": ");
                 for (Entry<Integer, ArrayList<String>> entry : temptree.entrySet()) {
                     // endSerial[0], coursecode[1], indexnum[2], classtype[3],venue[4]
@@ -135,8 +136,14 @@ public class Timetable implements Serializable, Cloneable{
         if (!checkTimeslot(t)) {// should not invole this! check before calling this method!
             throw new TimetableClash("Timetable Clash!");
         }
-        timeSlotSerialNumber.addAll(t.getTimeSlotSerialNumber());
-        timeSlotInformation.putAll(t.getTimeSlotInformation());
+        if (this.timeSlotInformation==null | this.timeSlotSerialNumber==null){
+            this.timeSlotInformation = t.getTimeSlotInformation();
+            this.timeSlotSerialNumber= t.getTimeSlotSerialNumber();
+        }
+        else{
+            this.timeSlotInformation.putAll(t.getTimeSlotInformation());
+            this.timeSlotSerialNumber.addAll(t.getTimeSlotSerialNumber());
+        }
     }
 
     public void removeTimetable(Timetable t) {

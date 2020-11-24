@@ -214,6 +214,7 @@ public class Student extends Person{
     public void printChanges() {
         // Print list of courses successfully swopped
         if (successChange != null) {
+            System.out.println("\n\n");
             for (Map.Entry<String, ArrayList<Integer>> entry : successChange.entrySet()) {
                 ArrayList<Integer> s = entry.getValue();
                 if (s.size() == 2) {
@@ -274,6 +275,7 @@ public class Student extends Person{
         registeredCourses.put(course, indexnum);
         totalau = totalau + CourseList.getCourse(course).getAU();
         timetable.mergeTimetable(getIndexTimetable(indexnum));
+        PersonList.savePersonMap();
     }
 
     public int verifyCourse(String course) {
@@ -327,7 +329,7 @@ public class Student extends Person{
                                                                                                 // added an
                                                                                                 // email addr
             message.setSubject(subject);
-            message.setText("Dear" + this.name.toUpperCase() + "\n\n" + text);
+            message.setText("Dear " + this.name.toUpperCase() + ": \n\n" + text);
 
             Transport.send(message);
 
@@ -435,5 +437,6 @@ public class Student extends Person{
         }
         return false;
     }
+
 
 }

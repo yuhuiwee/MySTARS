@@ -55,9 +55,9 @@ public class PersonList {
         newStudent("TestStudent15", "Test Student 15", "U6543210987", 'M', "Indonesian", "Business", 3,
                 "studentcz2002ss1@gmail.com");
 
-        newAdmin("Admin1", "Admin 1", "G1234567890", 'M', "Singaporean", "School of Computer Science and Engineering",
+        newAdmin("Admin1", "Admin 1", "G1234567890", 'M', "Singaporean", "Computer Science",
                 "Professor", "cz2002ss1@gmail.com");
-        newAdmin("Admin2", "Admin 2", "G2345678901", 'F', "Singaporean", "School of Physical and Mathematical Sciences",
+        newAdmin("Admin2", "Admin 2", "G2345678901", 'F', "Singaporean", "Philosophy",
                 "Associate Professor", "cz2002ss1@gmail.com");
 
         // write to ser file
@@ -90,8 +90,8 @@ public class PersonList {
             loadPersonList();
         }
 
-        if (plist.containsKey(username)) {
-            return plist.get(username);
+        if (plist.containsKey(username.toUpperCase())) {
+            return plist.get(username.toUpperCase());
         } else {
             throw new UserNotFound("User not found!");
         }
@@ -137,10 +137,10 @@ public class PersonList {
         if (checkMatricNum(matric)) {
             throw new UserAlreadyExists("This matric number is already taken!");
         }
-        Student s = new Student(username.toLowerCase(), name.toLowerCase(), matric.toUpperCase(),
-                Character.toUpperCase(gender), nationality.toLowerCase(), major.toLowerCase(), year,
-                email.toLowerCase());
-        plist.put(username.toLowerCase(), s);
+        Student s = new Student(username.toUpperCase(), name.toUpperCase(), matric.toUpperCase(),
+                Character.toUpperCase(gender), nationality.toUpperCase(), major.toUpperCase(), year,
+                email.toUpperCase());
+        plist.put(username.toUpperCase(), s);
         savePersonMap(); // Save map immediately after creating new student
         return;
 
@@ -152,10 +152,10 @@ public class PersonList {
             loadPersonList();
         }
 
-        Student s = (Student) getByUsername(username.toLowerCase());
+        Student s = (Student) getByUsername(username.toUpperCase());
         s.dropAllCourse();
-        PasswordHash.removeUser(username.toLowerCase());
-        plist.remove(username.toLowerCase(), s);
+        PasswordHash.removeUser(username.toUpperCase());
+        plist.remove(username.toUpperCase(), s);
         s = null;
         savePersonMap();
     }
@@ -167,17 +167,17 @@ public class PersonList {
         }
 
         // Check is username and matric number is already taken!
-        if (plist.containsKey(username)) {
+        if (plist.containsKey(username.toUpperCase())) {
             throw new UserAlreadyExists("This Username is taken!");
         }
-        if (checkMatricNum(id)) {
+        if (checkMatricNum(id.toUpperCase())) {
             throw new UserAlreadyExists("This matric number is taken!");
         }
 
-        Admin ad = new Admin(username.toLowerCase(), name.toLowerCase(), id.toUpperCase(),
-                Character.toUpperCase(gender), nationality.toLowerCase(), school.toLowerCase(), position.toLowerCase(),
-                email.toLowerCase());
-        plist.put(username.toLowerCase(), ad);
+        Admin ad = new Admin(username.toUpperCase(), name.toUpperCase(), id.toUpperCase(),
+                Character.toUpperCase(gender), nationality.toUpperCase(), school.toUpperCase(), position.toUpperCase(),
+                email.toUpperCase());
+        plist.put(username.toUpperCase(), ad);
         PersonList.savePersonMap();
     }
 
@@ -186,9 +186,9 @@ public class PersonList {
             loadPersonList();
         }
 
-        if (plist.containsKey(username)) {
-            if (plist.get(username) instanceof Admin) {
-                plist.remove(username);
+        if (plist.containsKey(username.toUpperCase())) {
+            if (plist.get(username.toUpperCase()) instanceof Admin) {
+                plist.remove(username.toUpperCase());
             } else {
                 throw new UserNotFound("Admin not found!");
             }
@@ -217,7 +217,7 @@ public class PersonList {
             loadPersonList();
         }
 
-        if (plist.containsKey(username.toLowerCase())) {
+        if (plist.containsKey(username.toUpperCase())) {
             return true;
         } else {
             return false; //false if  not used
@@ -226,7 +226,7 @@ public class PersonList {
 
     public static boolean checkMatricNum(String matric) {
         for (Person p : plist.values()) {
-            if (p.getMatric() == matric.toLowerCase()) {
+            if (p.getMatric() == matric.toUpperCase()) {
                 return true;
             }
         }

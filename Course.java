@@ -55,8 +55,8 @@ public class Course implements Serializable {
     }
 
     /* ----------- Set Methods ----------- */
-    public void setAU(int newau) {
-        this.au = newau;
+    public void setAU(int newAU) {
+        this.au = newAU;
     }
 
     public void setcourseCode(String courseCode) {
@@ -68,20 +68,26 @@ public class Course implements Serializable {
     }
 
     public void setIndexNumber(HashMap<Integer, IndexNum> indexMap) {
-        mapIndex.putAll(indexMap);
+        for (Map.Entry<Integer, IndexNum> entry: indexMap.entrySet()){
+            mapIndex.put(entry.getKey(), entry.getValue());
+        }
     }
 
     /* ----------- Normal Methods ----------- */
 
-    public boolean addCourse(IndexNum ind, String userName) // for students to add course
+    public boolean addCourse(int index, String userName) // for students to add course
     {
+        IndexNum ind = getIndexNum(index);
         boolean bool = ind.addStudent(userName); // mapIndex.get(course) = object
         return bool;
     }
 
     public void dropCourse(int index, String username, Boolean swopFlag)
             throws UserNotFound, UserAlreadyExists, CloneNotSupportedException, TimetableClash, VenueAlreadyExists {
-        mapIndex.get(index).removeStudent(courseCode, username, swopFlag);
+        IndexNum ind = getIndexNum(index);
+        ind.removeStudent(courseCode, username, swopFlag);
+        System.out.println("Course Level: ");
+        System.out.println(mapIndex.get(index).getVacancy());
         return;
     }
     public int getIndexVacancy(int indexNum) {
@@ -134,6 +140,10 @@ public class Course implements Serializable {
         while (i.hasNext()){
             System.out.println("\t"+String.valueOf(i.next()));
         }
+    }
+
+    public IndexNum getIndexNum(int index){
+        return mapIndex.get(index);
     }
 
 }

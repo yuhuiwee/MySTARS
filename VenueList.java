@@ -7,9 +7,11 @@ public class VenueList {
 
     public VenueList() {
         venueMap = new HashMap<String, Timetable>();
+        saveVenueMap();
     }
 
-    public static void newVenue(String newVenue) throws VenueAlreadyExists {
+    public static void newVenue(String newVenue) throws VenueAlreadyExists, TimetableClash,
+            CloneNotSupportedException {
         if (venueMap==null){
             loadVenueList();
         }
@@ -19,17 +21,12 @@ public class VenueList {
         Timetable t = new Timetable();
         venueMap.put(newVenue.toUpperCase(), t);
         saveVenueMap();
+        return;
 
     }
 
-    public static Timetable getTimetable(String venue) {
-        if (venueMap==null){
-            loadVenueList();
-        }
-        return venueMap.get(venue.toUpperCase());
-    }
-
-    public static boolean checkVenue(String venue) {
+    public static boolean checkVenue(String venue)
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         if (venueMap==null){
             loadVenueList();
         }
@@ -41,14 +38,15 @@ public class VenueList {
 
     }
 
-    public static Timetable getVenueTimetable(String venue) {
+    public static Timetable getVenueTimetable(String venue)
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         if (venueMap==null){
             loadVenueList();
         }
         return venueMap.get(venue.toUpperCase());
     }
 
-    public static void printAllVenues() {
+    public static void printAllVenues() throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         if (venueMap==null){
             loadVenueList();
         }
@@ -65,16 +63,21 @@ public class VenueList {
 
     }
 
-    public static void updateTimetable(String venue, Timetable t) {
+    public static void updateTimetable(String venue, Timetable t)
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         if (venueMap==null){
             loadVenueList();
+        }
+        if (!venueMap.containsKey(venue)){
+            newVenue(venue);
         }
         venueMap.replace(venue.toUpperCase(), t);
         saveVenueMap();
         return;
     }
 
-    public static void removetimetable(Timetable t){
+    public static void removetimetable(Timetable t)
+            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
         if (venueMap==null){
             loadVenueList();
         }
@@ -84,7 +87,7 @@ public class VenueList {
             ArrayList<String> a = entry.getValue();
             String venue = a.get(4);
             //get venue timetable
-            Timetable temp = getTimetable(venue);
+            Timetable temp = getVenueTimetable(venue);
             //remove class from venue timetable
             temp.removeClass(entry.getKey(), Integer.parseInt(a.get(0)));
 
@@ -106,7 +109,7 @@ public class VenueList {
 		}
 	}
     @SuppressWarnings("unchecked")
-	public static void loadVenueList() {
+	public static void loadVenueList() throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
 		try {
 			FileInputStream fis = new FileInputStream("VenueMap.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
@@ -118,7 +121,6 @@ public class VenueList {
 			fis.close();
 		} catch (IOException ioe) {
             // ioe.printStackTrace();
-            new VenueList();
 		} catch (ClassNotFoundException c) {
 			System.out.println("Class not found");
             c.printStackTrace();
