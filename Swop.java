@@ -82,6 +82,9 @@ public class Swop {
 			throws UserNotFound, UserAlreadyExists, CourseDontExist, CloneNotSupportedException, TimetableClash,
 			VenueAlreadyExists {
 		String k;
+		if (groups==null){
+			loadSwopList();
+		}
 		if (student1.compareTo(student2) > 0) {
 			k = student1 + ":" + student2;
 		} else {
@@ -151,7 +154,10 @@ public class Swop {
 	 * @return This is a true/false on whether the student is successful in dropping the swap
 	 */
 	public static boolean dropSwop(String student1, int index1) {
-
+		
+		if (groups==null){
+			loadSwopList();
+		}
 		for (Map.Entry<String, ArrayList<SwopGroup>> entry : groups.entrySet()) {
 			if (entry.getKey().contains(student1)) {
 				courseSwoplist = entry.getValue();
