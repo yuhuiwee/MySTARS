@@ -6,6 +6,11 @@ import java.security.SecureRandom;
 
 public class SHAExample {
 	
+	
+	/** 
+	 * @param args
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException {
 		String passwordToHash = "password";
 		String salt = getSalt();
@@ -23,6 +28,12 @@ public class SHAExample {
 		System.out.println(securePassword);
 	}
 
+	
+	/** 
+	 * @param passwordToHash
+	 * @param salt
+	 * @return String
+	 */
 	private static String get_SHA_1_SecurePassword(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
@@ -44,6 +55,12 @@ public class SHAExample {
 		return generatedPassword;
 	}
 	
+	
+	/** 
+	 * @param passwordToHash
+	 * @param salt
+	 * @return String
+	 */
 	private static String get_SHA_256_SecurePassword(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
@@ -65,6 +82,12 @@ public class SHAExample {
 		return generatedPassword;
 	}
 	
+	
+	/** 
+	 * @param passwordToHash
+	 * @param salt
+	 * @return String
+	 */
 	private static String get_SHA_384_SecurePassword(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
@@ -86,6 +109,12 @@ public class SHAExample {
 		return generatedPassword;
 	}
 	
+	
+	/** 
+	 * @param passwordToHash
+	 * @param salt
+	 * @return String
+	 */
 	private static String get_SHA_512_SecurePassword(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
@@ -107,6 +136,11 @@ public class SHAExample {
 		return generatedPassword;
 	}
 	
+	
+	/** 
+	 * @return String
+	 * @throws NoSuchAlgorithmException
+	 */
 	//Add salt
 	private static String getSalt() throws NoSuchAlgorithmException
 	{

@@ -7,6 +7,12 @@ import java.security.SecureRandom;
 
 public class SaltedMD5Example 
 {
+	
+	/** 
+	 * @param args
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException 
 	{
 		String passwordToHash = "password";
@@ -20,6 +26,12 @@ public class SaltedMD5Example
 		System.out.println(regeneratedPassowrdToVerify);
 	}
 	
+	
+	/** 
+	 * @param passwordToHash
+	 * @param salt
+	 * @return String
+	 */
 	private static String getSecurePassword(String passwordToHash, String salt)
 	{
 		String generatedPassword = null;
@@ -47,6 +59,12 @@ public class SaltedMD5Example
 		return generatedPassword;
 	}
 	
+	
+	/** 
+	 * @return String
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
 	//Add salt
 	private static String getSalt() throws NoSuchAlgorithmException, NoSuchProviderException
 	{

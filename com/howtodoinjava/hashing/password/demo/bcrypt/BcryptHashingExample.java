@@ -4,6 +4,11 @@ import java.security.NoSuchAlgorithmException;
 
 public class BcryptHashingExample 
 {
+	
+	/** 
+	 * @param args
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException 
 	{
 		String  originalPassword = "password";

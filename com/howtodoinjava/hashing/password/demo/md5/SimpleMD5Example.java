@@ -5,6 +5,10 @@ import java.security.NoSuchAlgorithmException;
 
 public class SimpleMD5Example 
 {
+	
+	/** 
+	 * @param args
+	 */
 	public static void main(String[] args) 
 	{
 		String passwordToHash = "password";

@@ -10,6 +10,12 @@ import javax.crypto.spec.PBEKeySpec;
 
 public class ReallyStrongSecuredPassword 
 {
+	
+	/** 
+	 * @param args
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException 
 	{
 		String  originalPassword = "password";
@@ -23,6 +29,14 @@ public class ReallyStrongSecuredPassword
 		System.out.println(matched);
 	}
 	
+	
+	/** 
+	 * @param originalPassword
+	 * @param storedPassword
+	 * @return boolean
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
 	private static boolean validatePassword(String originalPassword, String storedPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
 		String[] parts = storedPassword.split(":");
@@ -46,6 +60,13 @@ public class ReallyStrongSecuredPassword
 		return diff == 0;
 	}
 	
+	
+	/** 
+	 * @param password
+	 * @return String
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
 	private static String generateStorngPasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
 		int iterations = 1000;
@@ -59,6 +80,11 @@ public class ReallyStrongSecuredPassword
 				
 	}
 	
+	
+	/** 
+	 * @return String
+	 * @throws NoSuchAlgorithmException
+	 */
 	private static String getSalt() throws NoSuchAlgorithmException
 	{
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
@@ -67,6 +93,12 @@ public class ReallyStrongSecuredPassword
 		return salt.toString();
 	}
 	
+	
+	/** 
+	 * @param array
+	 * @return String
+	 * @throws NoSuchAlgorithmException
+	 */
 	private static String toHex(byte[] array) throws NoSuchAlgorithmException
 	{
 		BigInteger bi = new BigInteger(1, array);
@@ -80,6 +112,12 @@ public class ReallyStrongSecuredPassword
 		}
 	}
 	
+	
+	/** 
+	 * @param hex
+	 * @return byte[]
+	 * @throws NoSuchAlgorithmException
+	 */
 	private static byte[] fromHex(String hex) throws NoSuchAlgorithmException
 	{
 		byte[] bytes = new byte[hex.length() / 2];

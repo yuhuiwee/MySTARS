@@ -101,6 +101,11 @@ public class SCryptUtil {
         }
     }
 
+    
+    /** 
+     * @param n
+     * @return int
+     */
     private static int log2(int n) {
         int log = 0;
         if ((n & 0xffff0000 ) != 0) { n >>>= 16; log = 16; }

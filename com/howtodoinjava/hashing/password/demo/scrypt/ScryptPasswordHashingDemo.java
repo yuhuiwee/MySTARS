@@ -4,6 +4,10 @@ import com.lambdaworks.crypto.SCryptUtil;
 
 public class ScryptPasswordHashingDemo 
 {
+	
+	/** 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		String originalPassword = "password";
 		String generatedSecuredPasswordHash = SCryptUtil.scrypt(originalPassword, 16, 16, 16);
