@@ -127,13 +127,13 @@ public class IndexNum implements Serializable {
     // ****** Method to print student by index ******
     public void printStudentList() throws UserNotFound, UserAlreadyExists {
         System.out.println("\nStudent list of Course index number " + String.valueOf(indexNumber) + ":\n");
-        ListIterator<String> i = listOfRegisteredStudents.listIterator();
+        ListIterator<String> listOfRegisteredStudentsIterator = listOfRegisteredStudents.listIterator();
         int n = 1;
-        while (i.hasNext()) {
-            String name = i.next();
+        while (listOfRegisteredStudentsIterator.hasNext()) {
+            String name = listOfRegisteredStudentsIterator.next();
             Student s = (Student) PersonList.getByUsername(name);
             System.out.println(
-                    "\t" + String.valueOf(n++) + ") " + name + String.valueOf(s.getGender()) + s.getNationality());
+                    "\t" + String.valueOf(n++) + ") Name: " + s.getName() + ", Gender: "+ String.valueOf(s.getGender()) + ", Nationality: "+ s.getNationality());
         }
     }
 
@@ -147,7 +147,7 @@ public class IndexNum implements Serializable {
                 String name = i.next();
                 Student s = (Student) PersonList.getByUsername(name);
                 s.dropCourse(courseCode, indexNumber);
-                String text = "Dear "+name+"\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been de-registered from this course.";
+                String text = "\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been de-registered from this course.";
                 s.sendEmail("Course has been removed", text);
             }
             
@@ -159,10 +159,10 @@ public class IndexNum implements Serializable {
 
             //remove registeration for all students
             while (i.hasNext()){ 
-                String name = i.next();
-                Student s = (Student) PersonList.getByUsername(name);
+                String username = i.next();
+                Student s = (Student) PersonList.getByUsername(username);
                 s.dropCourse(courseCode, indexNumber);
-                String text = "Dear "+name+"\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been removed from the waiting list of this course.";
+                String text ="\nThis email is to inform you that Course: " + courseCode +", Index"+indexNumber+ " has been deleted by admin. You have been removed from the waiting list of this course.";
                 s.sendEmail("Course has been removed", text);
             }
         }

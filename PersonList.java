@@ -16,13 +16,13 @@ public class PersonList {
      * name, String id, char gender, String nationality, String position): void
      */
 
-    private static HashMap<String, Person> plist = null;
+    private static TreeMap<String, Person> plist = null;
 
     public PersonList() throws UserAlreadyExists {
 
         // Student(username, name, matric, gender, nationality)
 
-        plist = new HashMap<String, Person>();
+        plist = new TreeMap<String, Person>();
         new PasswordHash();
         newStudent("TestStudent1", "Test Student 1", "U1234567890", 'M', "Singaporean", "Comp Sci", 1,
                 "studentcz2002ss1@gmail.com");
@@ -70,8 +70,8 @@ public class PersonList {
             FileInputStream fis = new FileInputStream("PersonList.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
             Object temp = ois.readObject();
-            if (temp instanceof HashMap<?, ?>) {
-                plist = (HashMap<String, Person>) temp;
+            if (temp instanceof TreeMap<?, ?>) {
+                plist = (TreeMap<String, Person>) temp;
             }
             ois.close();
             fis.close();
@@ -224,12 +224,29 @@ public class PersonList {
         }
     }
 
-    public static boolean checkMatricNum(String matric) {
+    public static boolean checkMatricNum(String matric) throws UserAlreadyExists {
+        if (plist == null) {
+            loadPersonList();
+        }
         for (Person p : plist.values()) {
-            if (p.getMatric() == matric.toUpperCase()) {
+            if (p.getMatric() .equals( matric.toUpperCase())) {
                 return true;
             }
         }
         return false; // return false id matric isnt taken
+    }
+
+    public static void printStudentList() throws UserAlreadyExists {
+        if (plist == null) {
+            loadPersonList();
+        }
+        Student s;
+        for (Map.Entry<String, Person> entry: plist.entrySet()){
+            if (entry.getValue() instanceof Student){
+                s = (Student) entry.getValue();
+                s.printStudentDetails();
+                System.out.println();
+            }
+        }
     }
 }

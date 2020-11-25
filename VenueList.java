@@ -10,15 +10,14 @@ public class VenueList {
         saveVenueMap();
     }
 
-    public static void newVenue(String newVenue) throws VenueAlreadyExists, TimetableClash,
+    public static void newVenue(String newVenue, Timetable t) throws VenueAlreadyExists, TimetableClash,
             CloneNotSupportedException {
         if (venueMap==null){
             loadVenueList();
         }
-        if (!checkVenue(newVenue)) { // if false
-            return;
+        if (checkVenue(newVenue)) {
+            throw new VenueAlreadyExists("Venue Already Exists!");
         }
-        Timetable t = new Timetable();
         venueMap.put(newVenue.toUpperCase(), t);
         saveVenueMap();
         return;
@@ -51,7 +50,7 @@ public class VenueList {
             loadVenueList();
         }
         if (venueMap.isEmpty()) {
-            System.out.println("\tSorry, there are no venues stored in our database!");
+            System.out.println("\tThere are no venues stored in our database!");
             return;
         }
         Set<String> s = venueMap.keySet();
@@ -61,19 +60,6 @@ public class VenueList {
         }
         return;
 
-    }
-
-    public static void updateTimetable(String venue, Timetable t)
-            throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
-        if (venueMap==null){
-            loadVenueList();
-        }
-        if (!venueMap.containsKey(venue)){
-            newVenue(venue);
-        }
-        venueMap.replace(venue.toUpperCase(), t);
-        saveVenueMap();
-        return;
     }
 
     public static void removetimetable(Timetable t)
@@ -121,10 +107,25 @@ public class VenueList {
 			fis.close();
 		} catch (IOException ioe) {
             // ioe.printStackTrace();
+            new VenueList();
 		} catch (ClassNotFoundException c) {
 			System.out.println("Class not found");
             c.printStackTrace();
         }
     }
+
+    public static void bookSlot(int startSerial, int endSerial, String courseCode, int index, String courseType, String venue)
+            throws VenueAlreadyExists, TimetableClash, CloneNotSupportedException {
+        if (!venueMap.containsKey(venue.toUpperCase())){
+            Timetable t = new Timetable();
+            t.addClass(startSerial, endSerial, courseCode, index, courseType, venue.toUpperCase());
+            newVenue(venue.toUpperCase(), t);
+        }
+        else{
+            venueMap.get(venue).addClass(startSerial, endSerial, courseCode, index, courseType, venue);
+        }
+        saveVenueMap();
+    }
+        
 
 }

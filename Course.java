@@ -113,10 +113,21 @@ public class Course implements Serializable {
 
     public void printStudentList() throws UserNotFound, UserAlreadyExists {
         System.out.println("Course: " + courseCode);
-        for (Map.Entry<Integer, IndexNum> entry : mapIndex.entrySet()) {
-            entry.getValue().printStudentList();
+        for (Map.Entry<Integer, IndexNum> entryOfIndexNum : mapIndex.entrySet()) {
+            entryOfIndexNum.getValue().printStudentList();
         }
     }
+
+    // public ArrayList<String> getListOfStudents(Integer index){
+    //     ArrayList<String> studentsListInIndex;
+
+    //     for (Map.Entry<Integer, IndexNum> entryOfIndexNum : mapIndex.entrySet()) {
+    //         studentsListInIndex = entryOfIndexNum.getValue().getRegisteredStudentList();
+    //     }
+
+    //     return studentsListInIndex;
+
+    // }
 
     public void printAllIndexVacancies() {
         for (Map.Entry<Integer, IndexNum> entry : mapIndex.entrySet()) {
@@ -144,6 +155,17 @@ public class Course implements Serializable {
 
     public IndexNum getIndexNum(int index){
         return mapIndex.get(index);
+    }
+
+    public void changeIndexNum(int oldindex, int newindex) throws CourseDontExist {
+        if(!mapIndex.containsKey(oldindex)){
+            throw new CourseDontExist("Index number does not exist!");
+        }
+
+
+        IndexNum i = mapIndex.remove(oldindex);
+        i.setIndexNumber(newindex);
+        mapIndex.put(newindex, i);
     }
 
 }

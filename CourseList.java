@@ -51,10 +51,10 @@ public class CourseList {
 		
 		new VenueList();
 		// Creating and instantiating new venues
-		VenueList.newVenue("LT1A");
-		VenueList.newVenue("LT2A");
-		VenueList.newVenue("TR1");
-		VenueList.newVenue("SWLAB");
+		// VenueList.newVenue("LT1A");
+		// VenueList.newVenue("LT2A");
+		// VenueList.newVenue("TR1");
+		// VenueList.newVenue("SWLAB");
 
 		// Intiantiate timetable
 		Timetable sc1 = new Timetable();
@@ -72,47 +72,39 @@ public class CourseList {
 		sc4.addClass(311002, 313002, "CZ2002", -1, "Lecture", "LT2A");
 		sc5.addClass(311002, 313002, "PH2018", -1, "Lecture", "LT1A");
 		sc6.addClass(210001, 212001, "CZ2002", 1026, "Lab", "SWLAB");
-		sc7.addClass(210002, 212002, "CZ2002", 1027, "Lab", "SWLAB");
+		sc7.addClass(210000, 212000, "CZ2002", 1027, "Lab", "SWLAB");
 
-		VenueList.updateTimetable("LT2A", sc1.clone());
-		VenueList.updateTimetable("TR1", sc2.clone());
-		VenueList.updateTimetable("TR1", sc3.clone());
-		VenueList.updateTimetable("LT2A", sc4.clone());
-		VenueList.updateTimetable("LT1A", sc5.clone());
-		VenueList.updateTimetable("SWLAB", sc6.clone());
-		VenueList.updateTimetable("SWLAB", sc7.clone());
-		
-		
+		VenueList.bookSlot(110002, 112002, "CZ2001", -1, "Lecture", "LT2A");
+		VenueList.bookSlot(210002, 212002, "CZ2001", 1024, "Tutorial", "TR1");
+		VenueList.bookSlot(213002, 214002, "CZ2001", 1025, "Tutorial", "TR1");
+		VenueList.bookSlot(311002, 313002, "CZ2002", -1, "Lecture", "LT2A");
+		VenueList.bookSlot(311002, 313002, "PH2018", -1, "Lecture", "LT1A");
+		VenueList.bookSlot(210001, 212001, "CZ2002", 1026, "Lab", "SWLAB");
+		VenueList.bookSlot(210000, 212000, "CZ2002", 1027, "Lab", "SWLAB");
+
 
 		// Add timetable clone to index and to venue
 
 		//Add lecture for i1 and i2
 		i1.addClassSchedule(sc1.clone());
 		i2.addClassSchedule(sc1.clone());
-		VenueList.updateTimetable("LT2A", sc1.clone());
 
 		//Add tutorial for i1 and i2
 		i1.addClassSchedule(sc2.clone());
-		VenueList.updateTimetable("TR1", sc2.clone());
 		i2.addClassSchedule(sc3.clone());
-		VenueList.updateTimetable("TR1", sc3.clone());
 
 
 		//Add lecture for i3 and i4
 		i3.addClassSchedule(sc4.clone());
 		i4.addClassSchedule(sc4.clone());
-		VenueList.updateTimetable("LT2A", sc4.clone());
 
 		//Add lab session for i3 and i4
 		i3.addClassSchedule(sc6.clone());
-		VenueList.updateTimetable("SWLAB", sc6.clone());
 		i4.addClassSchedule(sc7.clone());
-		VenueList.updateTimetable("SWLAB", sc7.clone());
 
 		//Add lecture for i5 and i6
 		i5.addClassSchedule(sc5.clone());
 		i6.addClassSchedule(sc5.clone());
-		VenueList.updateTimetable("LT1A", sc5.clone());
 
 		// Create HashMap to put index for each course (Index Number, index Number object)
 		HashMap<Integer, IndexNum> cz2001 = new HashMap<Integer, IndexNum>();
@@ -256,7 +248,7 @@ public class CourseList {
 		{
 			for(String j: mapCourse.keySet())
 			{
-				checkCourseVacancies(j);
+				checkCourseVacancies(j);	//Prints courselist, indexnumber and vacancy
 			}
 		}
 		else //Print course by school
@@ -315,17 +307,18 @@ public class CourseList {
 			}
 		}
 		else {
-			if(schoolMapCourse.containsKey(courseCode))		// Makes sure admin from school A can only
-				return true;									// update course from school A
-			else
+			if(schoolMapCourse.get(school).contains(courseCode)){
+				return true;
+			}// Makes sure admin from school A can only update course from school A
+			else{
 				return false;
+			}
 		}
 		
 	}
 
 	// ****** Method to check index existence ******
 
-	//TODO: Edited method.. check
 	public static boolean checkIndexExistence(int index)
 			throws TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
 		if (mapCourse == null | indexMap==null | schoolMapCourse==null){
@@ -568,6 +561,22 @@ public class CourseList {
 		course = course.toUpperCase();
 		return mapCourse.get(course);
 	}
+
+	public static void printStudentListByCourse(String courseCode)
+			throws UserNotFound, UserAlreadyExists, TimetableClash, CloneNotSupportedException, VenueAlreadyExists {
+		getCourse(courseCode).printStudentList();
+	}
+
+	public static void changeIndex(int oldind, int newind, String courseCode) throws CourseDontExist {
+		Course c = mapCourse.get(courseCode);
+		c.changeIndexNum(oldind, newind);
+
+		indexMap.remove(oldind);
+		indexMap.put(newind, courseCode);
+	}
+
+
+
 
 	// Swopcourse(String student1, String student2, int index1, int index 2, String
 	// coursecode)

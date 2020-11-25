@@ -16,7 +16,7 @@ public class AccessPeriod implements Serializable {
 
     public static void CreateDefaultAccessPeriod() {
         // Default access period: 1st Nov 2020 to 30 Nov 2020 for all students
-        ZonedDateTime start = ZonedDateTime.parse("2020-10-25T00:00:00+08:00[Asia/Singapore]");
+        ZonedDateTime start = ZonedDateTime.parse("2020-11-26T00:00:00+08:00[Asia/Singapore]");
         ZonedDateTime end = ZonedDateTime.parse("2020-11-30T23:59:59+08:00[Asia/Singapore]");
         majoracc = new HashMap<String, ArrayList<ZonedDateTime>>();
         ArrayList<ZonedDateTime> temp = new ArrayList<ZonedDateTime>(2);
@@ -79,9 +79,9 @@ public class AccessPeriod implements Serializable {
         } else {
             System.out.println("Access Denied! Your Personalised access period is: ");
             System.out.println(
-                    "Start Date: " + DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(st.getStartDateTime()));
+                    "Start Date: " + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss Z").format(st.getStartDateTime()));
             System.out.println(
-                    "Start Date: " + DateTimeFormatter.ofPattern("dd/MM/yyyy - hh:mm Z").format(st.getEndDateTime()));
+                    "Start Date: " + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss Z").format(st.getEndDateTime()));
             return false;
         }
 

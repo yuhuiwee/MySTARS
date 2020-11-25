@@ -41,7 +41,7 @@ public class Timetable implements Serializable, Cloneable{
         System.out.println("\tClass Type: " + a.get(3));
         System.out.println("\tWeek Type: " + weekType);
         System.out.println("\tDay of the Week: " + DayOfWeek.of(day));
-        System.out.println("\tTimeslot: " + startSerial + " - " + a.get(0));
+        System.out.println("\tTimeslot: " + getTimefromSerial(startSerial) + " - " + getTimefromSerial(Integer.parseInt(a.get(0))));
         System.out.println("\tVenue: " + a.get(4) + "\n");
     }
 
@@ -212,7 +212,6 @@ public class Timetable implements Serializable, Cloneable{
 
         return;
     }
-
     public boolean checkStartEnd(int startSerial, int endSerial) {
         // return true if no clash
         // return false if clash
@@ -222,14 +221,15 @@ public class Timetable implements Serializable, Cloneable{
         ListIterator<Integer> i = timeSlotSerialNumber.listIterator();
         while (i.hasNext()) {
             int s = i.next();
-            if (s >= startSerial & s <= endSerial) { // Eg. s = 108300 (Monday, 8AM, Odd week) startSerial = 108002
-                                                     // endSerial = 110002
-                                                     // so as long as there is a clash between the intervals, the timing
-                                                     // will not be accepted
-                if (s % 10 == 2) { // For normal weeks
+            if (s >= startSerial & s <= endSerial) { 
+                /* Eg. s = 108300 (Monday, 8AM, Odd week) startSerial = 108002 endSerial = 110002
+                so as long as there is a clash between the intervals, the timing
+                will not be accepted
+                */
+                if (startSerial % 10 == 2) { // For normal weeks
                     return false;
                 }
-                if (s % 10 == startSerial % 10) { // For odd/even week
+                else if (s % 10 == startSerial % 10) { // For odd/even week
                     return false;
                 }
             }
@@ -278,6 +278,15 @@ public class Timetable implements Serializable, Cloneable{
             }
         }
         return t;
+    }
+
+    public boolean isEmpty(){
+        if (this.timeSlotSerialNumber.isEmpty()){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 }

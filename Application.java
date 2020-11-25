@@ -11,16 +11,27 @@ public class Application {
 
         Scanner sc = new Scanner(System.in);
         Console con = System.console();
-        System.out.println("Welcome to MySTARS\nPlease login to continue");
-        System.out.print("\nUsername: ");
-        String username = sc.next();
-        System.out.print("\nPassword: ");
-        char[] password = con.readPassword();
+        boolean check;
+        String username;
+        do{
+            System.out.println("Welcome to MySTARS\nPlease login to continue");
+            System.out.print("\nUsername: ");
+            username = sc.next();
+            System.out.print("\nPassword: ");
+            char[] password = con.readPassword();
 
-        if (!PasswordHash.checkPwd(username, String.valueOf(password))) {
-            sc.close();
-            throw new WrongPassword("Wrong Password entered!");
-        }
+            if (!PersonList.checkusername(username)){
+                System.out.println("Error! Username not found!\n\n");
+                check = false;
+            }
+            else if (!PasswordHash.checkPwd(username, String.valueOf(password))) {
+                check = false;
+                System.out.println("Error! Wrong password!\n\n");
+            }
+            else{
+                check = true;
+            }
+        }while(!check);
         Person user = PersonList.getByUsername(username.toLowerCase());
 
         if (user instanceof Student) {
@@ -32,6 +43,7 @@ public class Application {
                 StudentApp(sc, st, username.toLowerCase(), con);
                 
             } else {
+                System.out.println("Sorry, you are not allowed to access MySTARS");
                 System.exit(0);
             }
         } else if (user instanceof Admin) {
@@ -43,11 +55,12 @@ public class Application {
     private static void StudentApp(Scanner sc, Student st, String username, Console con) throws UserNotFound,
             UserAlreadyExists, WrongPassword, CourseDontExist, TimetableClash, CloneNotSupportedException,
             VenueAlreadyExists {
-        String coursecode;
+        String coursecode, newuser;
         int indexnum;
         int index2;
         int elec, option;
         boolean check;
+        Student s2;
 
         if (st.getSwopStatus()) { // Notify student if swop is successful
             st.printChanges();
@@ -195,22 +208,53 @@ public class Application {
                         }
                     }while (index == -1);
 
-                    System.out.println("Enter the username of the student you want to swop with (Enter Q to quit): ");
-                    String newuser = sc.next();
-                    if (coursecode.equals("Q") | coursecode.equals("q")){
-                        System.out.println("Quitting...");
-                        break stapp;
-                    }
-                    if (!PersonList.checkusername(newuser)) {
-                        throw new UserNotFound("User not found!");
-                    }
+                    check = false;
+                    do{
+                        System.out.println("Enter the username of the student you want to swop with (Enter Q to quit): ");
+                        newuser = sc.next();
+                        if (coursecode.equals("Q") | coursecode.equals("q")){
+                            System.out.println("Quitting...");
+                            break stapp;
+                        }
+                        if (!PersonList.checkusername(newuser)) {
+                            check = false;
+                            System.out.println("Error! User not found");
+                        }
+                        else {
+                            if(PersonList.getByUsername(newuser) instanceof Admin) {
+                            check = false;
+                            System.out.println("Error! This is not a valid student username!");
+                            }
+                            else{
+                                check = true;
+                            }
+                        }
+                    }while(!check);
+
+                    s2 = (Student) PersonList.getByUsername(newuser);
                     do{
                         System.out.println("Enter the New Index Number that you want to swop to: ");
                         index2 = getIntInput(sc);
-                        if (CourseList.checkIndex(coursecode, index2)){
+                        check = false;
+                        if (!CourseList.checkIndex(coursecode, index2)){
+                            check = false;
                             System.out.println("Sorry this index does not exist for this course!");
                         }
-					} while (CourseList.checkIndex(coursecode, index2));
+                        else{
+                            int verify = s2.verifyCourse(coursecode);
+                            if (verify==-1){
+                                check = false;
+                                System.out.println("Student is not registered for this course!");
+                            }else if (verify !=index2){
+                                check = false;
+                                System.out.println("Error! Student is not registered for this index!");
+                            }
+                            else{
+                                check = true;
+                            }
+                        }
+
+					} while (!check);
                     if (!st.swapIndexCheck(index, index2)) {
                         System.out.println(
                                 "Error! There is a time clash with the new index! Please try again with another person/index");
@@ -307,13 +351,14 @@ public class Application {
         String courseCode;
         int au;
 
-        adapp:
+        
         do {
             System.out.print("(1) Edit/Check Student Access Period\n" + "(2) Add Student\n" + "(3) Add new course\n"
                     + "(4) Update an existing course\n" + "(5) Check index number vacancies\n"
                     + "(6) Print student list\n"
-                    + "(7) Remove Student\n(9)Edit Student Details\n(10)Add new Admin\n(11)Quit\n");
+                    + "(7) Remove Student\n(8) Edit Student Details\n(9) Add new Admin\n(10) Quit\n");
             sel = getIntInput(sc);
+            adapp:
             switch (sel) {
                 case 1:// edit student access period
                     int acc = 0;
@@ -343,7 +388,7 @@ public class Application {
                             case 3:
                                 // Add new access period by major
                                 System.out.print("Enter major: ");
-                                major = sc.nextLine();
+                                major = sc.next();
                                 System.out.println("Enter year: \nFrom");
                                 f = getIntInput(sc);
                                 System.out.println("to ");
@@ -387,7 +432,7 @@ public class Application {
 
                                 do {
                                     System.out.print("Enter major: ");
-                                    major = sc.nextLine();
+                                    major = sc.next();
                                     System.out.println("Enter year: \nFrom");
                                     f = getIntInput(sc);
                                     System.out.println("to ");
@@ -417,23 +462,27 @@ public class Application {
                 case 2: // add a student
                     check = true;
                     do {
+                        System.out.println("Current List of Students: ");
+                        PersonList.printStudentList();
                         System.out.print("Enter student's username (Enter Q to quit): ");
-                        newUser = sc.nextLine();
+                        newUser = sc.next();
                         if (newUser.equals("Q") | newUser.equals("q")){
                             System.out.println("Quitting...");
                             break adapp;
                         }
-                        check = PersonList.checkusername(username);
+                        
+                        check = PersonList.checkusername(newUser);
                         if (check) {
                             System.out.println("This username is already taken!");
                         }
                     } while (check);
                     System.out.print("Enter student's name: ");
+                    sc.nextLine();
                     s_name = sc.nextLine();
-                    check = true;
                     do {
                         System.out.print("Enter student's matric number: ");
-                        matric = sc.nextLine();
+						matric = sc.next();
+    
                         check = PersonList.checkMatricNum(matric);
                         if (check) {
                             System.out.println("This matric number is already taken!");
@@ -443,14 +492,15 @@ public class Application {
                     do{
                         System.out.print("\nEnter student's gender(M/F): ");
                         gender = sc.next().charAt(0);
-                        gender = Character.toLowerCase(gender);
-                        if (gender!='m' | gender !='f'){
+                        gender = Character.toLowerCase(gender); 
+                        if (gender!='m' & gender !='f'){
                         System.out.println("\nError! Please re-enter gender: ");
                         }
-                    }while (gender!= 'f' | gender!= 'm');
+                    }while (gender!= 'f' & gender!= 'm');
                     System.out.print("\nEnter student's nationality: ");
                     nationality = sc.next();
                     System.out.print("\nEnter student's major: ");
+                    sc.nextLine();
                     major = sc.nextLine();
                     do{
                         System.out.print("\nEnter student's year: ");
@@ -464,15 +514,16 @@ public class Application {
                     }while(year>6 & year < 1);
                     do{
                         System.out.print("\nEnter student's email: ");
-                        email = sc.nextLine();
+                        email = sc.next();
                         if(!email.contains("@")){
                             System.out.println("Invalid email address!");
                             System.out.print("\nPlease re-enter email: ");
-                            email = sc.nextLine();
+                            email = sc.next();
                         }
                     }while (!email.contains("@"));
-                    PersonList.newStudent(username.toLowerCase(), s_name, matric, Character.toUpperCase(gender),
-                            nationality, major, year, email);
+                    PersonList.newStudent(newUser.toUpperCase(), s_name, matric, Character.toUpperCase(gender),
+							nationality, major, year, email);
+                    PersonList.printStudentList();
                     break;
 
                 case 3: //add new course
@@ -495,7 +546,7 @@ public class Application {
                     int vacancy = CourseList.getIndexNum(index).getVacancy();
                     System.out.println("\nThe vacancy for index " + index + " is: " + vacancy);
                     break;
-                case 6: //print by indexnum
+                case 6: //print student list
                     int option;
                     do {
                         System.out.println("(1) Print Student List by Course: ");
@@ -509,7 +560,7 @@ public class Application {
                                 check = false;
                                 do {
                                     System.out.print("Enter Course code: ");
-                                    courseCode = sc.nextLine();
+                                    courseCode = sc.next();
                                     courseCode = courseCode.toUpperCase();
                                     check = CourseList.checkCourseExistence(courseCode, ad.getSchool());    //Admin school A update course from school A
                                     if (!check) {
@@ -517,7 +568,7 @@ public class Application {
                                         + " courses under " + ad.getSchool() + " school that you are registered to.");
                                     }
                                 } while (!check);
-                                CourseList.getCourse(courseCode).printStudentList();
+                                CourseList.printStudentListByCourse(courseCode);
                                 break;
                             case 2:
                                 check = false;
@@ -529,7 +580,7 @@ public class Application {
                                         System.out.println("This index does not exist!");
                                     }
                                 } while (!check);
-                                CourseList.getIndexNum(index).printStudentList();
+                                CourseList.getIndexNum(index).printStudentList();                            
                                 break;
                             case 3:
                                 System.out.println("Returning to main menu..");
@@ -545,7 +596,7 @@ public class Application {
                     check = false;
                     do {
                         System.out.println("Username of Student to be removed (Enter Q to quit): ");
-                        username = sc.nextLine();
+                        username = sc.next();
                         if (username.equals("Q") | username.equals("q")){
                             System.out.println("Quitting...");
                             break adapp;
@@ -562,13 +613,16 @@ public class Application {
                         }
                     } while (!check);
                     PersonList.removeStudent(username);
+                    System.out.println("Current list of students: ");
+                    PersonList.printStudentList();
+                    System.out.println("\n\n");
                     break;
 
                 case 8: // edit student details
                     check = false;
                     do {
                         System.out.println("Username of Student to edit (Enter Q to quit): ");
-                        username = sc.nextLine();
+                        username = sc.next();
                         if (username.equals("Q") | username.equals("q")){
                             System.out.println("Quitting...");
                             break adapp;
@@ -605,7 +659,7 @@ public class Application {
                             case 1: // name
                                 System.out.println("Current name: " + s_name);
                                 System.out.print("\nNew Name: ");
-                                s_name = sc.nextLine();
+                                s_name = sc.next();
                                 s.setName(s_name);
                                 break;
                             case 2:// matric
@@ -613,7 +667,7 @@ public class Application {
                                 do {
                                     System.out.println("Current matric: " + matric);
                                     System.out.print("\nNew Matrix: ");
-                                    matric = sc.nextLine();
+                                    matric = sc.next();
                                     check = PersonList.checkMatricNum(matric);
                                     if (check) {
                                         System.out.println("this matric number is already taken!");
@@ -634,13 +688,13 @@ public class Application {
                             case 4: // nationality
                                 System.out.println("Current nationality: " + nationality);
                                 System.out.print("\nNew Nationality: ");
-                                nationality = sc.nextLine();
+                                nationality = sc.next();
                                 s.setNationality(nationality);
                                 break;
                             case 5: // major
                                 System.out.println("Current major: " + major);
                                 System.out.print("\nNew major: ");
-                                major = sc.nextLine();
+                                major = sc.next();
                                 s.setSchool(major);
                                 break;
                             case 6: // year
@@ -652,10 +706,10 @@ public class Application {
                             case 7: // email
                                 System.out.println("Current email: " + email);
                                 System.out.print("\nNew email: ");
-                                email = sc.nextLine();
+                                email = sc.next();
                                 while (!email.contains("@")) {
                                     System.out.println("Error! Please enter a valid email: ");
-                                    email = sc.nextLine();
+                                    email = sc.next();
                                 }
                                 s.setEmail(email);
                                 break;
@@ -676,7 +730,7 @@ public class Application {
                     check = true;
                     do{
                         System.out.print("Enter new admin username (Enter Q to quit): ");
-                        newUser = sc.nextLine();
+                        newUser = sc.next();
                         if (newUser.equals("Q") | newUser.equals("q")){
                             System.out.println("Quitting...");
                             break adapp;
@@ -688,12 +742,12 @@ public class Application {
                     }while (check);
 
                     System.out.print("Enter name: ");
-                    s_name = sc.nextLine();
+                    s_name = sc.next();
 
                     check = true;
                     do{
                         System.out.print("Enter ID: ");
-                        matric = sc.nextLine();
+                        matric = sc.next();
 
                         check = PersonList.checkMatricNum(matric);
                         if (check){
@@ -713,18 +767,18 @@ public class Application {
                     System.out.print("\nEnter nationality: ");
                     nationality = sc.next();
                     System.out.print("\nEnter School (Eg. Computer Science): ");
-                    major = sc.nextLine();
+                    major = sc.next();
 
                     System.out.print("Enter position: ");
-                    String position = sc.nextLine();
+                    String position = sc.next();
 
                     do{
                         System.out.print("\nEnter student's email: ");
-                        email = sc.nextLine();
+                        email = sc.next();
                         if(!email.contains("@")){
                             System.out.println("Invalid email address!");
                             System.out.print("\nPlease re-enter email: ");
-                            email = sc.nextLine();
+                            email = sc.next();
                         }
                     }while (!email.contains("@"));
                     
@@ -783,7 +837,7 @@ public class Application {
 
         // Get max number of days in that month
         YearMonth yearMonthObject = YearMonth.of(yyyy, mm);
-        int daysInMonth = yearMonthObject.lengthOfMonth();
+        int daysInMonth = yearMonthObject.lengthOfMonth(); //max number of days in a month
 
         while (dd > daysInMonth && (dd < minDay & mm == minMonth & minYear == yyyy)) {
             // check if month > max days in month entered
@@ -831,20 +885,31 @@ public class Application {
         boolean check = false;
         String z = "";
         while (!check) {
-            System.out.println("Enter TimeZone (eg. 00:00 for GMT and -08:00 for GMT-08:00)");
+            System.out.println("Enter TimeZone (eg. 00:00 for GMT and +08:00 for GMT +08:00)");
             System.out.println("Press Enter for Singapore Time Zone (Default)");
-            String zone = sc.nextLine();
+            String zone = sc.next();
             if (zone.isEmpty()) {
                 check = true;
-                z = "+08:00[Asia/Singapore]";
-            } else if (zone == "00:00") {
+                z = "+08:00";
+            } else if (zone.equals("00:00")){
                 check = true;
                 z = "+00:00";
             } else if (zone.contains(":") & (zone.startsWith("+") | zone.startsWith("-"))) {
-                check = true;
-                z = zone;
+                String[] dt = zone.split(":");//split by ":"
+                try{
+                    int h = Integer.parseInt(dt[0].substring(1));//remove "-"/"+"
+                    if (h<0 | h >12){//check that gmt is between 0 - 12
+                        check = false;
+                    }
+                    else{
+                        check = true;
+                        z = zone;
+                    }
+                }catch(NumberFormatException e){
+                    check = false;
+                }
             } else {
-                System.out.println("Error! Please re-enter!");
+                System.out.println("Error! Please re-enter in the correct format!");
                 check = false;
             }
         }
@@ -855,7 +920,7 @@ public class Application {
             dt = ZonedDateTime.parse(datestring);
         } catch (DateTimeException e) {
             System.out.println("Error!");
-            dt = inputDateTime(sc, minYear, minMonth, minDay, minhour, minmin);
+            dt = inputDateTime(sc, minYear, minMonth, minDay, minhour, minmin); //retry if error
         }
 
         return dt;
@@ -880,7 +945,7 @@ public class Application {
         do {
             CourseList.printAllCourse("All"); // So if value "All", all courses will be printed out
             System.out.print("\nEnter the new Course Code (Enter Q to quit): ");
-            courseCode = sc.nextLine();
+            courseCode = sc.next();
             if (courseCode.equals("Q") | courseCode.equals("q")){
                 System.out.println("Quitting...");
                 return;
@@ -945,7 +1010,7 @@ public class Application {
             System.out.println("For Index: " + String.valueOf(index));
             for (int i = 0; i < classNum; i++) { // Classes in this index
                 System.out.println("Enter Course Type: \n\tEg. Tutorial,Seminar, Lab etc.");
-                courseType = sc.nextLine(); // will not be checking coursetype
+                courseType = sc.next(); // will not be checking coursetype
                 temp = getCourseDetails(sc, courseType, courseCode, index, temp);// Timetable clashes are handled inside this method
             }                                                          
             temp.removeTimetable(time);
@@ -955,6 +1020,8 @@ public class Application {
         CourseList.newIndexNumbers(indexMap, courseCode);// add to indexlist in courselist
 
         System.out.println("You have successfully added the course");
+
+        CourseList.printAllCourse("All");       // Requirement in the test case to list all the courses after the addition.
 
         // NOTE: For debugging purposes! Delete after debugging
         for (Map.Entry<Integer, IndexNum> entry : indexMap.entrySet()) {
@@ -986,7 +1053,7 @@ public class Application {
         check = false;
         do {
             System.out.print("Enter Course Code that you would like to update (Enter Q to quit): ");
-            courseCode = sc.nextLine();
+            courseCode = sc.next();
             if (courseCode.equals("Q") | courseCode.equals("q")){
                 System.out.println("Quitting...");
                 return;
@@ -1005,8 +1072,8 @@ public class Application {
         do{
             System.out.println("1) Change Course code name" + "\n" + "2) Change Course Code School" + "\n"
                     + "3) Remove Course" + "\n" + "4) Add/Delete index numbers" + "\n" + "5) Change index number digits"
-                    + "\n" + "6) Update index number's vacancy" + "\n" + "7) Update index number's schedule" + "\n"
-                    + "8) Return to Main menu" + "\n");
+                    + "\n" + "6) Update index number's vacancy" + "\n"
+                    + "7) Return to Main menu" + "\n");
 
             System.out.print("Please enter your choice: ");
             choice = getIntInput(sc);
@@ -1018,7 +1085,7 @@ public class Application {
                         CourseList.printAllCourse("All");
                         System.out.println("\nNote: Do not use any coursecode listed above as your new coursecode.\n");
                         System.out.print("Enter new Course Code (Enter Q to quit): ");
-                        newCourseCode = sc.nextLine();
+                        newCourseCode = sc.next();
                         if (newCourseCode.equals("Q") | newCourseCode.equals("q")){
                             System.out.println("Quitting...");
                             break upapp;
@@ -1035,7 +1102,7 @@ public class Application {
                 case 2:// UPDATE SCHOOL
                     do{
                         System.out.print("Enter the new school (Enter Q to quit): ");
-                        school = sc.nextLine();
+                        school = sc.next();
                         if (school.equals("Q") | school.equals("q")){
                             System.out.println("Quitting...");
                             break upapp;
@@ -1057,7 +1124,7 @@ public class Application {
 						if (!CourseList.getIndexNum(index).getRegisteredStudentList().isEmpty()) {
 							System.out.println("This course has students registered");
 							System.out.println("Would you still like to continue to remove this course? [Y/N]");
-							yn = sc.nextLine().charAt(0);
+							yn = sc.next().charAt(0);
 
 							do {
 								switch (Character.toLowerCase(yn)) {
@@ -1089,7 +1156,9 @@ public class Application {
 
                     switch(option){
                         case 1: //ADD NEW INDEX NUMBER TO COURSE
+                            System.out.println("\n\nIndexes currently in use: ");
                             CourseList.printAllIndex();
+                            System.out.println("\n\n");
                             do {
                                 System.out.println("Enter a new index number to add: ");
                                 index = getIntInput(sc);
@@ -1101,35 +1170,49 @@ public class Application {
                             System.out.print("Enter the number of vacancies for this index: ");
                             vacancy = getIntInput(sc);
                             ind = new IndexNum(index, vacancy);
-            
-                            do {
-                                System.out.println(
-                                        "Does this index have the same lecture time slots as the rest of the indices? [y/n]");
-                                ch = sc.nextLine().charAt(0);
-            
-                                switch (Character.toLowerCase(ch)) {
-                                    case 'y':
-                                        ArrayList<Integer> indexes = c.getIndexNumber();
-                                        t = CourseList.getIndexNum(indexes.get(0)).getClassSchedule().getLectureTimings();
-                                        break;
-                                    case 'n':
-                                        t = new Timetable();
-                                        break;
-                                    default:
-                                        System.out.println("Please enter a valid option!");
-                                        break;
+
+                            if (!c.getIndexNumber().isEmpty()){ // check if there are any existing index numbers
+                                ArrayList<Integer> indexes = c.getIndexNumber();
+                                if (!c.getIndexNum(indexes.get(0)).getClassSchedule().getLectureTimings().isEmpty()){
+                                    do {
+                                        System.out.println(
+                                                "Does this index have the same lecture time slots as the rest of the indices? [y/n]");
+                                        ch = sc.next().charAt(0);
+                    
+                                        switch (Character.toLowerCase(ch)) {
+                                            case 'y':
+                                                t = CourseList.getIndexNum(indexes.get(0)).getClassSchedule().getLectureTimings();
+                                                break;
+                                            case 'n':
+                                                t = new Timetable();
+                                                break;
+                                            default:
+                                                System.out.println("Please enter a valid option!");
+                                                break;
+                                        }
+                                    } while (Character.toLowerCase(ch) != 'y' & Character.toLowerCase(ch) != 'n');
                                 }
-                            } while (Character.toLowerCase(ch) != 'y' & Character.toLowerCase(ch) != 'n');
-                            time = t.clone();
+                                else{
+                                    t = new Timetable();
+                                }
+                            }else{
+                                t = new Timetable();
+                            }
+            
+                            
+                            time = t.clone(); //clone so that original timetable is not edites
                             System.out.print("Enter the number of classes to add: ");
                             numClass = getIntInput(sc);
                             for (int j = 0; j < numClass; j++) {
                                 System.out.print("Enter the lesson type (eg. tutorial/seminar/lab): ");
-                                String courseType = sc.nextLine();
+                                String courseType = sc.next();
                                 //check venue timetable + check existing timetable
                                 time = getCourseDetails(sc, courseType, courseCode, index, time);
                             }
-                            ind.addClassSchedule(time);    
+                            ind.addClassSchedule(time);
+                            HashMap<Integer, IndexNum> temp = new HashMap<Integer, IndexNum>();
+                            temp.put(index, ind);
+                            CourseList.newIndexNumbers(temp, courseCode);
                             System.out.println("Successfully added new index num!");
                             // NOTE: For debugging purposes!
                             ind.printCourseSchedule();
@@ -1149,7 +1232,7 @@ public class Application {
                                     if (!CourseList.getIndexNum(index).getRegisteredStudentList().isEmpty()){   // If not empty  
                                         System.out.println("This index has students registered to it.");
                                         System.out.println("Would you still like to continue to remove this indexnumber? [Y/N]");
-                                        yn = sc.nextLine().charAt(0);
+                                        yn = sc.next().charAt(0);
                             
                                         do{
                                             switch(Character.toLowerCase(yn)){
@@ -1191,8 +1274,6 @@ public class Application {
                         }
                     } while (!check);
 
-                    ind = CourseList.getIndexNum(index);
-
 					check = true;
                     CourseList.printAllIndex();
                     do {
@@ -1204,14 +1285,12 @@ public class Application {
                         }
                     } while (check);
 
-                    ind.setIndexNumber(newIndex); // update self
-                    HashMap<Integer, IndexNum> map = new HashMap<Integer, IndexNum>();
-                    map.put(newIndex, ind);
-                    CourseList.newIndexNumbers(map, courseCode); // update courselist
-                    c.setIndexNumber(map); // update course
+                    CourseList.changeIndex(index, newIndex, courseCode);
                     break;
                 case 6: //UPDATE INDEXNUMBER VACANCY
                     check = false;
+                    System.out.println("Indices for Course: " + courseCode.toUpperCase());
+                    c.printAllIndex();
                     do {
                         System.out.print("Enter index number: ");
                         index = getIntInput(sc);
@@ -1248,18 +1327,22 @@ public class Application {
             HH = getIntInput(sc);
             if (HH < minTime / 100) { // Hour lesser than 8
                 System.out.println("Error! Please enter a valid hour!");
+                System.out.printf("You only enter a hour on or after %04d\n\n", minTime);
             } // Should we check If user enter value > 23? And since this method is reused for
               // end time, should we check that the time cannot be 20 as 1900 should be the
               // last timing?
+            if (HH>24){
+                System.out.println("Please enter a valid hour!");
+            }
         } while (HH < minTime / 100);
 
         do {
             System.out.print("Enter minutes (00 / 30): ");
             MM = getIntInput(sc);
-            if (MM != 0 | MM != 15) {// only check this if this is used for lesson time input
+            if (MM != 0 & MM != 30) {// only check this if this is used for lesson time input
                 System.out.println("Error! You can only have lessons at 1/2 hour intervals!\nPlease try again!");
             }
-        } while (MM != 0 | MM != 15); // Should this be 30 instead?
+        } while (MM != 0 & MM != 30); // Should this be 30 instead?
 
         int time = HH * 100 + MM;
 
@@ -1331,14 +1414,13 @@ public class Application {
                 t.printWeeklySchedule();
 
             } else {
-                VenueList.newVenue(venue);
+                VenueList.newVenue(venue, new Timetable());
                 t = VenueList.getVenueTimetable(venue);
             }
 
             do {
                 System.out.println("Enter Start Time: ");
-                startTime = getTimeInput(sc, 800); // 800 represents 8AM, so basically it is used to check if starttime is before
-                                            // 8
+                startTime = getTimeInput(sc, 759); //ensure start time is after 0759 (earliest is 8am)
                 startSerial = serialNum + startTime * 10;
                 System.out.println("Enter End Time: ");
                 endTime = getTimeInput(sc, startTime); // Have to pass in starttime as an argument as we are reusing this method for
@@ -1356,9 +1438,10 @@ public class Application {
         }while (!tb.checkStartEnd(startSerial, endSerial));
         tb.addClass(startSerial, endSerial, courseCode, index, courseType, venue);
         t.addClass(startSerial, endSerial, courseCode, index, courseType, venue);
+        VenueList.printAllVenues();
         // NOTE: Venue should technically be updated already...
         // if it isnt, un-comment bottom code
-        // VenueList.updateTimetable(venue, t.clone());
+        // VenueList.bookSlot(startSerial, endSerial, courseCode, index, venue)
         return tb; // Return the clone of the timetable object
     }
 

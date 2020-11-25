@@ -34,6 +34,7 @@ public class Student extends Person{
         //public Person(String username, String name, String matric, char gender, String nationality, String school, String email)
         super(user.toUpperCase(), name.toUpperCase(), matric.toUpperCase(), Character.toUpperCase(gender), nationality.toUpperCase(), major.toUpperCase(), email.toUpperCase());
         this.totalau = 0;
+        this.year = year;
         registeredCourses = new HashMap<String, Integer>();
         waitlistCourses = new HashMap<String, Integer>();
         this.accessTime = new AccessPeriod(major, year);
@@ -42,6 +43,7 @@ public class Student extends Person{
         maxau = 21; // default
         pendingSwap = new HashMap<Integer, Integer>();
         successChange = new HashMap<String, ArrayList<Integer>>();
+        
 
         PasswordHash.addUserPwd(user.toUpperCase(), user.toUpperCase());
     }
